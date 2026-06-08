@@ -1,0 +1,614 @@
+﻿<!doctype html>
+<html lang="vi">
+
+
+<body>
+
+    <header class="site-header" style="margin-top:10px;">
+        >
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-12 col-12 d-flex flex-wrap">
+                    <p class="d-flex me-4 mb-0">
+                        <i class="bi-house-fill me-2"></i>
+                        Hệ thống thi trực tuyến đa môn học
+                    </p>
+
+                    <p class="d-flex d-lg-block d-md-block d-none me-4 mb-0">
+                        <i class="bi-clock-fill me-2"></i>
+                        <strong class="me-2">Thứ 2 - Thứ 6</strong> 8:00 AM - 5:30 PM
+                    </p>
+
+                    <p class="site-header-icon-wrap text-white d-flex mb-0 ms-auto">
+                        <i class="site-header-icon bi-whatsapp me-2"></i>
+
+                        <a href="tel: 0123456789" class="text-white">
+                            0123 456 789
+                        </a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+
+
+    <main>
+
+        <section class="hero-section hero-section-full-height d-flex justify-content-center align-items-center">
+            <div class="section-overlay"></div>
+
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-7 col-12 text-center mx-auto">
+                        <h1 class="cd-headline rotate-1 text-white mb-4 pb-2">
+                            <span>Thi trực tuyến</span>
+                            <span class="cd-words-wrapper">
+                                <b class="is-visible">Mọi môn học</b>
+                                <b>Mọi cấp độ</b>
+                                <b>Mọi lúc mọi nơi</b>
+                            </span>
+                        </h1>
+
+                        <a class="custom-btn btn button button--atlas smoothscroll me-3" asp-controller="Exam" asp-action="Index">
+                            <span>Bắt đầu ngay</span>
+
+                            <div class="marquee" aria-hidden="true">
+                                <div class="marquee__inner">
+                                    <span>Bắt đầu ngay</span>
+                                    <span>Bắt đầu ngay</span>
+                                    <span>Bắt đầu ngay</span>
+                                    <span>Bắt đầu ngay</span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a class="custom-btn custom-border-btn custom-btn-bg-white btn button button--pan smoothscroll" asp-controller="Home" asp-action="About">
+                            <span>Tìm hiểu thêm</span>
+                        </a>
+
+                        <!-- ========== THÊM NÚT ĐĂNG NHẬP/ĐĂNG KÝ VÀO ĐÂY ========== -->
+                        <div class="mt-4 d-flex justify-content-center gap-3">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                                if (role == "Admin")
+                                {
+                                    <a href="/Admin/Dashboard" class="btn btn-danger px-4 py-2 rounded-pill">
+                                        🔧 Vào trang quản trị
+                                    </a>
+                                }
+                                else if (role == "Teacher")
+                                {
+                                    <a href="/Teacher/Dashboard" class="btn btn-primary px-4 py-2 rounded-pill">
+                                        📚 Vào trang giảng viên
+                                    </a>
+                                }
+                                else if (role == "Student")
+                                {
+                                    <a href="/Student/Dashboard" class="btn btn-success px-4 py-2 rounded-pill">
+                                        📖 Vào trang học viên
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <a class="btn btn-outline-light px-4 py-2 rounded-pill" asp-controller="Account" asp-action="Login">
+                                    🔐 Đăng nhập
+                                </a>
+                                <a class="btn btn-warning px-4 py-2 rounded-pill" asp-controller="Account" asp-action="Register">
+                                    📝 Đăng ký miễn phí
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#ffffff" fill-opacity="1" d="M0,224L40,229.3C80,235,160,245,240,250.7C320,256,400,256,480,240C560,224,640,192,720,176C800,160,880,160,960,138.7C1040,117,1120,75,1200,80C1280,85,1360,139,1400,165.3L1440,192L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path></svg>
+        </section>
+
+
+        <section class="intro-section" id="intro-section">
+            <div class="container">
+                <div class="row justify-content-lg-center align-items-center">
+
+                    <div class="col-lg-6 col-12">
+                        <h2 class="mb-4">Hệ thống thi trực tuyến <br>Đa dạng môn học - Chất lượng cao</h2>
+
+                        <p><a href="#">Thi Trực Tuyến</a> là nền tảng kiểm tra kiến thức trực tuyến hàng đầu với <strong>hơn 20 môn học</strong> từ cấp Tiểu học đến Đại học. Bạn có thể luyện tập và thi thử mọi lúc, mọi nơi.</p>
+                        <p><strong>Hoàn toàn miễn phí</strong> với ngân hàng câu hỏi phong phú, đa dạng. Kết quả được phân tích chi tiết giúp bạn nhận ra điểm mạnh, điểm yếu của mình.</p>
+
+                        <!-- ========== THÊM NÚT XEM BÀI THI VÀO ĐÂY ========== -->
+                        <div class="mt-4">
+                            <a href="/Exam" class="btn btn-primary px-4 py-2 rounded-pill">
+                                🚀 Xem danh sách bài thi
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12 custom-block-wrap">
+                        <img src="/Temp/images/Anhbia.png" class="img-fluid">
+
+                        <div class="custom-block d-flex flex-column">
+                            <h6 class="text-white mb-3">Cần hỗ trợ? <br> Hãy gọi cho chúng tôi:</h6>
+
+                            <p class="d-flex mb-0">
+                                <i class="bi-telephone-fill custom-icon me-2"></i>
+
+                                <a href="tel: 0123456789">
+                                    0123 456 789
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <section class="services-section section-padding section-bg" id="services-section">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-12 col-12">
+                        <h2 class="mb-4">Danh mục bài thi</h2>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="services-thumb">
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5 col-12">
+                                    <div class="services-image-wrap">
+                                        <a href="services-detail.html">
+                                            <img src="/Temp/images/services/Khoahoctunhien.jpg" class="services-image img-fluid" alt="">
+                                            <img src="/Temp/images/services/Khoahoctunhien.png" class="services-image services-image-hover img-fluid" alt="">
+
+                                            <div class="services-icon-wrap">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-cash me-2"></i>
+                                                        30 phút
+                                                    </p>
+
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-clock-fill me-2"></i>
+                                                        25 câu
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7 col-md-7 col-12 d-flex align-items-center">
+                                    <div class="services-info mt-4 mt-lg-0 mt-md-0">
+                                        <h4 class="services-title mb-1 mb-lg-2">
+                                            <a class="services-title-link" href="services-detail.html">Khoa học tự nhiên</a>
+                                        </h4>
+
+                                        <p>Toán học, Vật lý, Hóa học, Sinh học - Nắm vững kiến thức nền tảng</p>
+
+                                        <div class="d-flex flex-wrap align-items-center">
+                                            <div class="reviews-icons">
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star"></i>
+                                                <i class="bi-star"></i>
+                                            </div>
+
+                                            <a href="services-detail.html" class="custom-btn btn button button--atlas mt-2 ms-auto">
+                                                <span>Làm bài ngay</span>
+
+                                                <div class="marquee" aria-hidden="true">
+                                                    <div class="marquee__inner">
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="services-thumb">
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5 col-12">
+                                    <div class="services-image-wrap">
+                                        <a href="services-detail.html">
+                                            <img src="/Temp/images/services/Khoahocxahoi.jpg" class="services-image img-fluid" alt="">
+                                            <img src="/Temp/images/services/Khoahocxahoi(1).png" class="services-image services-image-hover img-fluid" alt="">
+
+                                            <div class="services-icon-wrap">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-cash me-2"></i>
+                                                        45 phút
+                                                    </p>
+
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-clock-fill me-2"></i>
+                                                        35 câu
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7 col-md-7 col-12 d-flex align-items-center">
+                                    <div class="services-info mt-4 mt-lg-0 mt-md-0">
+                                        <h4 class="services-title mb-1 mb-lg-2">
+                                            <a class="services-title-link" href="services-detail.html">Khoa học xã hội</a>
+                                        </h4>
+
+                                        <p>Ngữ văn, Lịch sử, Địa lý, GDCD - Khám phá thế giới quan</p>
+
+                                        <div class="d-flex flex-wrap align-items-center">
+                                            <div class="reviews-icons">
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                            </div>
+
+                                            <a href="services-detail.html" class="custom-btn btn button button--atlas mt-2 ms-auto">
+                                                <span>Làm bài ngay</span>
+
+                                                <div class="marquee" aria-hidden="true">
+                                                    <div class="marquee__inner">
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="services-thumb mb-lg-0">
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5 col-12">
+                                    <div class="services-image-wrap">
+                                        <a href="services-detail.html">
+                                            <img src="/Temp/images/services/Ngoaingu.png" class="services-image img-fluid" alt="">
+                                            <img src="/Temp/images/services/Tienganh.jpg" class="services-image services-image-hover img-fluid" alt="">
+
+                                            <div class="services-icon-wrap">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-cash me-2"></i>
+                                                        60 phút
+                                                    </p>
+
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-clock-fill me-2"></i>
+                                                        45 câu
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7 col-md-7 col-12 d-flex align-items-center">
+                                    <div class="services-info mt-4 mt-lg-0 mt-md-0">
+                                        <h4 class="services-title mb-1 mb-lg-2">
+                                            <a class="services-title-link" href="services-detail.html">Ngoại ngữ</a>
+                                        </h4>
+
+                                        <p>Tiếng Anh, Tiếng Trung, Tiếng Nhật, Tiếng Hàn - Giao tiếp toàn cầu</p>
+
+                                        <div class="d-flex flex-wrap align-items-center">
+                                            <div class="reviews-icons">
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                            </div>
+
+                                            <a href="services-detail.html" class="custom-btn btn button button--atlas mt-2 ms-auto">
+                                                <span>Làm bài ngay</span>
+
+                                                <div class="marquee" aria-hidden="true">
+                                                    <div class="marquee__inner">
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="services-thumb mb-lg-0">
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5 col-12">
+                                    <div class="services-image-wrap">
+                                        <a href="services-detail.html">
+                                            <img src="/Temp/images/services/Congnghethongtin(1).jpg" class="services-image img-fluid" alt="">
+                                            <img src="/Temp/images/services/Congnghethongtin.jpg" class="services-image services-image-hover img-fluid" alt="">
+
+                                            <div class="services-icon-wrap">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-cash me-2"></i>
+                                                        90 phút
+                                                    </p>
+
+                                                    <p class="text-white mb-0">
+                                                        <i class="bi-clock-fill me-2"></i>
+                                                        60 câu
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7 col-md-7 col-12 d-flex align-items-center">
+                                    <div class="services-info mt-4 mt-lg-0 mt-md-0">
+                                        <h4 class="services-title mb-1 mb-lg-2">
+                                            <a class="services-title-link" href="services-detail.html">Tin học & CNTT</a>
+                                        </h4>
+
+                                        <p>Lập trình, Cơ sở dữ liệu, Mạng máy tính - Công nghệ số</p>
+
+                                        <div class="d-flex flex-wrap align-items-center">
+                                            <div class="reviews-icons">
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star-fill"></i>
+                                                <i class="bi-star"></i>
+                                            </div>
+
+                                            <a href="services-detail.html" class="custom-btn btn button button--atlas mt-2 ms-auto">
+                                                <span>Làm bài ngay</span>
+
+                                                <div class="marquee" aria-hidden="true">
+                                                    <div class="marquee__inner">
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                        <span>Làm bài ngay</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <section class="testimonial-section section-padding section-bg">
+            <div class="section-overlay"></div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-12 text-center">
+                        <h2 class="text-white mb-4">Học viên tiêu biểu</h2>
+                        <p class="text-white-50 mb-5">Những gương mặt xuất sắc trên hệ thống</p>
+                    </div>
+                </div>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-lg-5 col-md-6 col-12">
+                        <div class="featured-block p-4 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); transition: transform 0.3s;">
+                            <div class="d-flex align-items-center">
+                                <div class="position-relative">
+                                    <img src="/Temp/images/avatar/Anhkiet.jpg" class="rounded-circle"
+                                         style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #ffc107; box-shadow: 0 0 20px rgba(255,193,7,0.3);"
+                                         onerror="this.src='https://ui-avatars.com/api/?background=ffc107&color=fff&size=100&rounded=true&name=Phạm+Anh+Kiệt'">
+                                    <span class="position-absolute bottom-0 end-0 bg-warning rounded-circle p-1 border border-2 border-white">
+                                        <i class="bi-star-fill text-dark" style="font-size: 14px;"></i>
+                                    </span>
+                                </div>
+                                <div class="ms-4">
+                                    <h4 class="text-white mb-1">Phạm Anh Kiệt</h4>
+                                    <p class="text-white-50 mb-1 small">⭐ 4.8/5 - 45 bài thi</p>
+                                    <div class="reviews-icons">
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-half text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-3 mb-0 text-white-50 fst-italic small">
+                                <i class="bi-quote me-2"></i>"Nền tảng thi trực tuyến rất tốt, giao diện thân thiện, dễ sử dụng. Giúp em ôn tập hiệu quả."
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-12">
+                        <div class="featured-block p-4 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); transition: transform 0.3s;">
+                            <div class="d-flex align-items-center">
+                                <div class="position-relative">
+                                    <img src="/Temp/images/avatar/Ngochieu.jpg" class="rounded-circle"
+                                         style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #28a745; box-shadow: 0 0 20px rgba(40,167,69,0.3);"
+                                         onerror="this.src='https://ui-avatars.com/api/?background=28a745&color=fff&size=100&rounded=true&name=Huỳnh+Ngọc+Hiếu'">
+                                    <span class="position-absolute bottom-0 end-0 bg-success rounded-circle p-1 border border-2 border-white">
+                                        <i class="bi-trophy-fill text-white" style="font-size: 14px;"></i>
+                                    </span>
+                                </div>
+                                <div class="ms-4">
+                                    <h4 class="text-white mb-1">Huỳnh Ngọc Hiếu</h4>
+                                    <p class="text-white-50 mb-1 small">🏆 Top 3 - 38 bài thi</p>
+                                    <div class="reviews-icons">
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-3 mb-0 text-white-50 fst-italic small">
+                                <i class="bi-quote me-2"></i>"Kết quả thi được lưu lại, giúp tôi theo dõi quá trình học tập và thấy được sự tiến bộ."
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-12">
+                        <div class="featured-block p-4 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); transition: transform 0.3s;">
+                            <div class="d-flex align-items-center">
+                                <div class="position-relative">
+                                    <img src="/Temp/images/avatar/Hoangphuc.jpg" class="rounded-circle"
+                                         style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #0dcaf0; box-shadow: 0 0 20px rgba(13,202,240,0.3);"
+                                         onerror="this.src='https://ui-avatars.com/api/?background=0dcaf0&color=fff&size=100&rounded=true&name=Phạm+Nguyễn+Hoàng+Phúc'">
+                                    <span class="position-absolute bottom-0 end-0 bg-info rounded-circle p-1 border border-2 border-white">
+                                        <i class="bi-gem-fill text-white" style="font-size: 14px;"></i>
+                                    </span>
+                                </div>
+                                <div class="ms-4">
+                                    <h4 class="text-white mb-1">Phạm Nguyễn Hoàng Phúc</h4>
+                                    <p class="text-white-50 mb-1 small">💎 Xuất sắc - 52 bài thi</p>
+                                    <div class="reviews-icons">
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-3 mb-0 text-white-50 fst-italic small">
+                                <i class="bi-quote me-2"></i>"Đa dạng môn học, câu hỏi được cập nhật thường xuyên. Rất phù hợp cho học sinh ôn thi."
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-12">
+                        <div class="featured-block p-4 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); transition: transform 0.3s;">
+                            <div class="d-flex align-items-center">
+                                <div class="position-relative">
+                                    <img src="/Temp/images/avatar/Anhduc.jpg" class="rounded-circle"
+                                         style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #ff6b6b; box-shadow: 0 0 20px rgba(255,107,107,0.3);"
+                                         onerror="this.src='https://ui-avatars.com/api/?background=ff6b6b&color=fff&size=100&rounded=true&name=Nguyễn+Anh+Đức'">
+                                    <span class="position-absolute bottom-0 end-0 bg-danger rounded-circle p-1 border border-2 border-white">
+                                        <i class="bi-lightning-charge-fill text-white" style="font-size: 14px;"></i>
+                                    </span>
+                                </div>
+                                <div class="ms-4">
+                                    <h4 class="text-white mb-1">Nguyễn Anh Đức</h4>
+                                    <p class="text-white-50 mb-1 small">⚡ Tiến bộ - 30 bài thi</p>
+                                    <div class="reviews-icons">
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star-fill text-warning"></i>
+                                        <i class="bi-star text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-3 mb-0 text-white-50 fst-italic small">
+                                <i class="bi-quote me-2"></i>"Tôi đã cải thiện điểm số đáng kể sau khi sử dụng hệ thống để luyện tập hàng ngày."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <style>
+            .featured-block:hover {
+                transform: translateY(-5px);
+                background: rgba(255,255,255,0.15) !important;
+                transition: all 0.3s ease;
+            }
+        </style>
+
+
+        <section class="partners-section">
+            <div class="container">
+                <div class="row justify-content-center align-items-center">
+
+                    <div class="col-lg-12 col-12">
+                        <h4 class="partners-section-title bg-white shadow-lg">Đối tác giáo dục</h4>
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <img src="/Temp/images/partners/toprak-leasing.svg" class="partners-image img-fluid">
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <img src="/Temp/images/partners/glorix.svg" class="partners-image img-fluid">
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <img src="/Temp/images/partners/woocommerce.svg" class="partners-image img-fluid">
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <img src="/Temp/images/partners/rolf-leasing.svg" class="partners-image img-fluid">
+                    </div>
+
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <img src="/Temp/images/partners/unilabs.svg" class="partners-image img-fluid">
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== THÊM SECTION CALL TO ACTION VÀO CUỐI TRANG ========== -->
+        <section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="container text-center">
+                <h2 class="text-white mb-4">🚀 Sẵn sàng để thử thách bản thân?</h2>
+                <p class="text-white mb-4">Hàng ngàn câu hỏi, đa dạng môn học đang chờ bạn</p>
+
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="btn btn-light px-4 py-2 rounded-pill fw-bold" asp-controller="Exam" asp-action="Index">
+                            📝 Bắt đầu thi ngay
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-light px-4 py-2 rounded-pill fw-bold" asp-controller="Account" asp-action="Login">
+                            🔐 Đăng nhập để thi
+                        </a>
+                        <a class="btn btn-warning px-4 py-2 rounded-pill fw-bold" asp-controller="Account" asp-action="Register">
+                            📝 Đăng ký miễn phí
+                        </a>
+                    }
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+</body>
+</html>

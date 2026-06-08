@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<section class="hero-section d-flex align-items-center" style="min-height: 80vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-5">
+                        <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
+
+                        @if (!string.IsNullOrEmpty(ViewBag.Error))
+                        {
+                            <div class="alert alert-danger">@ViewBag.Error</div>
+                        }
+
+                        <form method="post">
+                            <div class="mb-3"><label class="form-label">Họ và tên</label><input type="text" name="fullname" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label">Tên đăng nhập</label><input type="text" name="username" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label">Mật khẩu</label><input type="password" name="password" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label">Xác nhận mật khẩu</label><input type="password" name="confirmPassword" class="form-control" required></div>
+
+                            <!-- Thêm role selection -->
+                            <div class="mb-3"><label class="form-label">Đăng ký với vai trò</label><select name="role" class="form-select"><option value="Student">📖 Học viên (làm bài thi, xem kết quả)</option><option value="Teacher">📚 Giảng viên (tạo đề thi, ngân hàng câu hỏi)</option></select></div>
+                            <small class="text-muted d-block mb-3">⚠️ Vai trò Admin chỉ được cấp bởi quản trị viên</small>
+
+                            <div class="form-check mb-3"><input type="checkbox" class="form-check-input" id="terms" required><label class="form-check-label" for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a></label></div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2">Đăng ký</button>
+                            <p class="text-center mt-3 mb-0">Đã có tài khoản? <a href="/Account/Login">Đăng nhập ngay</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,361 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>@ViewData["Title"] - Thi Trực Tuyến</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="/Temp/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/Temp/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="/Temp/css/tooplate-clean-work.css" rel="stylesheet">
+
+    <style>
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        /* FIX NAVBAR ĐÈ NỘI DUNG */
+body {
+    padding-top: 50px;
+}
+
+/* Các trang quản trị */
+main {
+    min-height: 70vh;
+}
+
+/* Navbar luôn nằm trên cùng */
+.navbar {
+    padding-top: -100px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: #6EA8D7 !important;
+}
+
+/* Trang login/register cần khoảng cách lớn hơn */
+.auth-section,
+.login-section,
+.register-section {
+    margin-top: 40px;
+}
+
+        .dropdown-menu {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        /* Fix menu responsive */
+        @@media (max-width: 991px) {
+            .navbar-nav.ms-auto {
+                margin-top: 15px;
+            }
+            /* FIX NAVBAR ĐÈ NỘI DUNG */
+body {
+    padding-top: 90px;
+}
+
+/* Các trang quản trị */
+main {
+    min-height: 70vh;
+}
+
+/* Navbar luôn nằm trên cùng */
+.navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    z-index: 99999 !important;
+    position: relative !important;
+
+    background-color: #6EA8D7 !important;
+}
+
+/* Trang login/register cần khoảng cách lớn hơn */
+.auth-section,
+.login-section,
+.register-section {
+    margin-top: 40px;
+}
+.navbar {
+    min-height: 60px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.navbar-brand {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.logo {
+    max-height: 45px !important;
+    width: auto !important;
+}
+
+.navbar-nav .nav-link {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+        }
+    </style>
+</head>
+<body>
+
+   
+    <!-- NAVBAR - GIỮ NGUYÊN template cũ của bạn -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <img src="/Temp/images/Logo.png" class="logo img-fluid" alt="">
+                <span class="ms-2">Clean Work</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Menu Home - GIỮ NGUYÊN -->
+                    <li class="nav-item">
+                        <a class="nav-link active" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+
+                    <!-- Menu Bài Thi - THÊM MỚI -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Exam" asp-action="Index">Bài Thi</a>
+                    </li>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                        @if (role == "Admin")
+                        {
+                            <!-- Admin Dropdown -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                                <ul class="dropdown-menu dropdown-menu-light">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">👥 Quản lý người dùng</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Subjects">📚 Quản lý môn học</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="QuestionBank">📖 Ngân hàng câu hỏi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Exams">📝 Quản lý kỳ thi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Statistics">📊 Thống kê</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Settings">⚙️ Cấu hình</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else if (role == "Teacher")
+                        {
+                            <!-- Teacher Dropdown -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Giảng viên</a>
+                                <ul class="dropdown-menu dropdown-menu-light">
+                                    <li><a class="dropdown-item" asp-controller="Teacher" asp-action="QuestionBank">📖 Ngân hàng câu hỏi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Exams">📝 Quản lý đề thi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Teacher" asp-action="CreateExam">➕ Tạo đề thi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Grading">✏️ Chấm bài</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Statistics">📊 Thống kê giảng dạy</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Settings">⚙️ Cấu hình</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else if (role == "Student")
+                        {
+                            <!-- Student Dropdown -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Học viên</a>
+                                <ul class="dropdown-menu dropdown-menu-light">
+                                    <li><a class="dropdown-item" asp-controller="Exam" asp-action="Index">📝 Bài thi của tôi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Student" asp-action="History">📜 Lịch sử thi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Student" asp-action="Ranking">🏆 Xếp hạng</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Student" asp-action="Statistics">📊 Thống kê cá nhân</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Student" asp-action="Settings">⚙️ Cấu hình</a></li>
+                                </ul>
+                            </li>
+                        }
+                    }
+
+                    <!-- Nút Get started / Đăng nhập / User menu -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name;
+                        var avatar = User.FindFirst("Avatar")?.Value ?? "";
+
+                        <li class="nav-item dropdown ms-3">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@(string.IsNullOrEmpty(avatar) ? "https://ui-avatars.com/api/?background=667eea&color=fff&size=35&rounded=true&name=" + fullName : avatar)"
+                                     class="user-avatar me-2"
+                                     onerror="this.src='https://ui-avatars.com/api/?background=667eea&color=fff&size=35&rounded=true&name=User'">
+                                <span>@fullName</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end">
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">👤 Hồ sơ</a></li>
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">🔑 Đổi mật khẩu</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">🚪 Đăng xuất</a></li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item ms-3">
+                            <a class="nav-link custom-btn custom-border-btn custom-btn-bg-white btn" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="nav-link custom-btn btn btn-primary text-white" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- FOOTER - GIỮ NGUYÊN template cũ của bạn -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-12 d-flex align-items-center mb-4 pb-2">
+                    <div>
+                        <img src="/Temp/images/Logo.png" class="logo img-fluid" alt="">
+                    </div>
+                    <ul class="footer-menu d-flex flex-wrap ms-5">
+                        <li class="footer-menu-item"><a href="#" class="footer-menu-link">About Us</a></li>
+                        <li class="footer-menu-item"><a href="#" class="footer-menu-link">Blog</a></li>
+                        <li class="footer-menu-item"><a href="#" class="footer-menu-link">Reviews</a></li>
+                        <li class="footer-menu-item"><a href="#" class="footer-menu-link">Contact</a></li>
+                        <li class="footer-menu-item"><a asp-controller="Exam" asp-action="Index" class="footer-menu-link">Bài Thi</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-5 col-12 mb-4 mb-lg-0">
+                    <h5 class="site-footer-title mb-3">Our Services</h5>
+                    <ul class="footer-menu">
+                        <li class="footer-menu-item">
+                            <a href="#" class="footer-menu-link">
+                                <i class="bi-chevron-double-right footer-menu-link-icon me-2"></i>
+                                House Cleaning
+                            </a>
+                        </li>
+                        <li class="footer-menu-item">
+                            <a href="#" class="footer-menu-link">
+                                <i class="bi-chevron-double-right footer-menu-link-icon me-2"></i>
+                                Car Washing
+                            </a>
+                        </li>
+                        <li class="footer-menu-item">
+                            <a href="#" class="footer-menu-link">
+                                <i class="bi-chevron-double-right footer-menu-link-icon me-2"></i>
+                                Laundry
+                            </a>
+                        </li>
+                        <li class="footer-menu-item">
+                            <a href="#" class="footer-menu-link">
+                                <i class="bi-chevron-double-right footer-menu-link-icon me-2"></i>
+                                Office Cleaning
+                            </a>
+                        </li>
+                        <li class="footer-menu-item">
+                            <a href="#" class="footer-menu-link">
+                                <i class="bi-chevron-double-right footer-menu-link-icon me-2"></i>
+                                Toilet Cleaning
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0 mb-md-0">
+                    <h5 class="site-footer-title mb-3">Office</h5>
+                    <p class="text-white d-flex mt-3 mb-2">
+                        <i class="bi-geo-alt-fill me-2"></i>
+                        Akershusstranda 20, 0150 Oslo, Norway
+                    </p>
+                    <p class="text-white d-flex mb-2">
+                        <i class="bi-telephone-fill me-2"></i>
+                        <a href="tel: 110-220-9800" class="site-footer-link">110-220-9800</a>
+                    </p>
+                    <p class="text-white d-flex">
+                        <i class="bi-envelope-fill me-2"></i>
+                        <a href="mailto:info@company.com" class="site-footer-link">info@company.com</a>
+                    </p>
+                    <ul class="social-icon mt-4">
+                        <li class="social-icon-item">
+                            <a href="#" class="social-icon-link button button--skoll">
+                                <span></span>
+                                <span class="bi-twitter"></span>
+                            </a>
+                        </li>
+                        <li class="social-icon-item">
+                            <a href="#" class="social-icon-link button button--skoll">
+                                <span></span>
+                                <span class="bi-facebook"></span>
+                            </a>
+                        </li>
+                        <li class="social-icon-item">
+                            <a href="#" class="social-icon-link button button--skoll">
+                                <span></span>
+                                <span class="bi-instagram"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 col-6 mt-3 mt-lg-0 mt-md-0">
+                    <div class="featured-block">
+                        <h5 class="text-white mb-3">Service Hours</h5>
+                        <strong class="d-block text-white mb-1">Mon - Fri</strong>
+                        <p class="text-white mb-3">8:00 AM - 5:30 PM</p>
+                        <strong class="d-block text-white mb-1">Sat</strong>
+                        <p class="text-white mb-0">6:00 AM - 2:30 PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="site-footer-bottom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-12">
+                        <p class="copyright-text mb-0">Copyright © 2036 Clean Work Co., Ltd.</p>
+                    </div>
+                    <div class="col-lg-6 col-12 text-end">
+                        <p class="copyright-text mb-0">
+                            // Designed by <a href="https://www.tooplate.com" target="_parent">Tooplate</a> //
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="/Temp/js/jquery.min.js"></script>
+    <script src="/Temp/js/bootstrap.min.js"></script>
+    <script src="/Temp/js/jquery.backstretch.min.js"></script>
+    <script src="/Temp/js/counter.js"></script>
+    <script src="/Temp/js/countdown.js"></script>
+    <script src="/Temp/js/init.js"></script>
+    <script src="/Temp/js/modernizr.js"></script>
+    <script src="/Temp/js/animated-headline.js"></script>
+    <script src="/Temp/js/custom.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

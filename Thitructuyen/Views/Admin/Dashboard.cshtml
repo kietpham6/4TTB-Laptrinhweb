@@ -1,0 +1,180 @@
+﻿@{
+    ViewData["Title"] = "Bảng điều khiển";
+}
+
+<section class="intro-section section-padding">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>📊 Bảng điều khiển hệ thống</h2>
+                <p class="text-muted">Tổng quan hoạt động của hệ thống thi trực tuyến</p>
+            </div>
+        </div>
+
+        <!-- Thống kê nhanh -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Tổng người dùng</h6>
+                                <h2 class="text-white mb-0">1,234</h2>
+                                <small class="text-white-50">↑ 12% so với tháng trước</small>
+                            </div>
+                            <i class="bi-people-fill fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Đề thi đang hoạt động</h6>
+                                <h2 class="text-white mb-0">24</h2>
+                                <small class="text-white-50">8 đang diễn ra</small>
+                            </div>
+                            <i class="bi-file-text-fill fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-warning text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Phiên thi đang diễn ra</h6>
+                                <h2 class="text-white mb-0">156</h2>
+                                <small class="text-white-50">48 thí sinh đang làm bài</small>
+                            </div>
+                            <i class="bi-clock-history fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Điểm trung bình</h6>
+                                <h2 class="text-white mb-0">7.8</h2>
+                                <small class="text-white-50">Tăng 0.5 điểm</small>
+                            </div>
+                            <i class="bi-graph-up fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ và thống kê chi tiết -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">📈 Biểu đồ phổ điểm</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <canvas id="scoreChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">🍩 Tỷ lệ đỗ/rớt</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <canvas id="passRateChart" height="250"></canvas>
+                        <div class="text-center mt-3">
+                            <span class="badge bg-success">Đỗ: 68%</span>
+                            <span class="badge bg-danger ms-2">Rớt: 32%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top thí sinh và bài thi gần đây -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">🏆 Top 5 thí sinh xuất sắc</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr><th>#</th><th>Họ tên</th><th>Số bài thi</th><th>Điểm TB</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>🥇</td><td>Nguyễn Văn A</td><td>12</td><td class="text-success fw-bold">9.5</td></tr>
+                                    <tr><td>🥈</td><td>Trần Thị B</td><td>10</td><td class="text-success fw-bold">8.9</td></tr>
+                                    <tr><td>🥉</td><td>Lê Văn C</td><td>8</td><td class="text-success fw-bold">8.5</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">📝 Bài thi gần đây</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr><th>Tên bài thi</th><th>Số thí sinh</th><th>Điểm TB</th><th>Trạng thái</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Kiểm tra giữa kỳ</td><td>120</td><td>7.8</td><td><span class="badge bg-success">Đã kết thúc</span></td></tr>
+                                    <tr><td>Ôn tập cuối kỳ</td><td>95</td><td>6.5</td><td><span class="badge bg-warning">Đang diễn ra</span></td></tr>
+                                    <tr><td>Đánh giá năng lực</td><td>200</td><td>-</td><td><span class="badge bg-info">Sắp diễn ra</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Biểu đồ phổ điểm
+        new Chart(document.getElementById('scoreChart'), {
+            type: 'bar',
+            data: {
+                labels: ['0-2', '2-4', '4-6', '6-8', '8-10'],
+                datasets: [{
+                    label: 'Số lượng thí sinh',
+                    data: [5, 12, 45, 89, 67],
+                    backgroundColor: '#667eea',
+                    borderRadius: 8
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+
+        // Biểu đồ tỷ lệ đỗ/rớt
+        new Chart(document.getElementById('passRateChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Đỗ (≥5)', 'Rớt (<5)'],
+                datasets: [{
+                    data: [68, 32],
+                    backgroundColor: ['#28a745', '#dc3545']
+                }]
+            }
+        });
+    </script>
+}

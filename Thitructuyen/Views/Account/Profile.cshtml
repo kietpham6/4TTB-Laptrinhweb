@@ -1,0 +1,147 @@
+﻿@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name;
+    var avatar = User.FindFirst("Avatar")?.Value ?? "/Temp/images/avatar/default-avatar.png";
+    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+
+<section class="intro-section section-padding" style="margin-top:120px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center p-4">
+                        <!-- Avatar với nút đổi -->
+                        <div class="position-relative d-inline-block">
+                            <img id="avatarPreview" src="@avatar" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #667eea;">
+                            <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 35px; height: 35px;" onclick="document.getElementById('avatarInput').click();">
+                                <i class="bi-camera-fill"></i>
+                            </button>
+                            <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
+                        </div>
+                        <h4 class="mt-3">@fullName</h4>
+                        <p class="text-muted">@User.Identity.Name</p>
+                        <span class="badge bg-primary px-3 py-2">@role</span>
+
+                        <hr class="my-3">
+
+                        <div class="text-start">
+                            <p><i class="bi-envelope me-2"></i> @User.Identity.Name</p>
+                            @if (User.FindFirst("StudentId") != null)
+                            {
+                                <p><i class="bi-card-list me-2"></i> Mã SV: @User.FindFirst("StudentId")?.Value</p>
+                            }
+                            @if (User.FindFirst("Class") != null)
+                            {
+                                <p><i class="bi-people me-2"></i> Lớp: @User.FindFirst("Class")?.Value</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h4 class="mb-3">Thông tin chi tiết</h4>
+
+                        @if (!string.IsNullOrEmpty(ViewBag.Success))
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi-check-circle-fill me-2"></i> @ViewBag.Success
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(ViewBag.Error))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <form method="post" asp-action="Profile">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Họ và tên</label>
+                                    <input type="text" name="fullname" class="form-control" value="@fullName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Email</label>
+                                    <input type="email" name="email" class="form-control" value="@User.Identity.Name">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Số điện thoại</label>
+                                    <input type="tel" name="phone" class="form-control" placeholder="0123 456 789">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Ngày sinh</label>
+                                    <input type="date" name="birthday" class="form-control">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Địa chỉ</label>
+                                <textarea name="address" class="form-control" rows="2" placeholder="Nhập địa chỉ của bạn..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi-save me-2"></i>Cập nhật thông tin
+                            </button>
+                            <button type="button" class="btn btn-outline-primary px-4 ms-2" onclick="saveAvatar()">
+                                <i class="bi-image me-2"></i>Cập nhật ảnh đại diện
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+                    <div class="card-body p-4">
+                        <h4 class="mb-3">Thống kê hoạt động</h4>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h3 class="text-primary mb-0">12</h3>
+                                    <small class="text-muted">Bài đã thi</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h3 class="text-success mb-0">8.5</h3>
+                                    <small class="text-muted">Điểm TB</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h3 class="text-warning mb-0">#15</h3>
+                                    <small class="text-muted">Xếp hạng</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function saveAvatar() {
+        var fileInput = document.getElementById('avatarInput');
+        if (fileInput.files.length > 0) {
+            alert('Đã cập nhật ảnh đại diện thành công!');
+        } else {
+            alert('Vui lòng chọn ảnh trước!');
+        }
+    }
+</script>

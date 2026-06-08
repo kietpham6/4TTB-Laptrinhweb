@@ -1,0 +1,239 @@
+﻿@{
+    ViewData["Title"] = "Quản lý môn học";
+}
+
+<section class="services-section section-padding">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2>📚 Quản lý môn học</h2>
+                        <p class="text-muted">Quản lý danh sách các môn học trong hệ thống</p>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+                        <i class="bi-plus-lg me-2"></i>Thêm môn học
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="🔍 Tìm kiếm môn học...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterDepartment">
+                            <option value="">Tất cả khoa</option>
+                            <option>Khoa CNTT</option>
+                            <option>Khoa Toán</option>
+                            <option>Khoa Vật lý</option>
+                            <option>Khoa Ngoại ngữ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterStatus">
+                            <option value="">Tất cả trạng thái</option>
+                            <option>Hoạt động</option>
+                            <option>Tạm dừng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="filterSubjects()">🔍 Lọc</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Mã môn</th>
+                                <th>Tên môn học</th>
+                                <th>Số tín chỉ</th>
+                                <th>Khoa</th>
+                                <th>Số câu hỏi</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 fw-bold">TOAN101</td>
+                                <td>Toán cao cấp</td>
+                                <td>3</td>
+                                <td>Khoa Toán</td>
+                                <td>245</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td class="text-center pe-4">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editSubject(1)"><i class="bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSubject(1, 'Toán cao cấp')"><i class="bi-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-bold">LY101</td>
+                                <td>Vật lý đại cương</td>
+                                <td>4</td>
+                                <td>Khoa Vật lý</td>
+                                <td>189</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td class="text-center pe-4">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editSubject(2)"><i class="bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSubject(2, 'Vật lý đại cương')"><i class="bi-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-bold">CNTT101</td>
+                                <td>Lập trình Web</td>
+                                <td>3</td>
+                                <td>Khoa CNTT</td>
+                                <td>567</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td class="text-center pe-4">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editSubject(3)"><i class="bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSubject(3, 'Lập trình Web')"><i class="bi-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-bold">ANH101</td>
+                                <td>Tiếng Anh B1</td>
+                                <td>2</td>
+                                <td>Khoa Ngoại ngữ</td>
+                                <td>432</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td class="text-center pe-4">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editSubject(4)"><i class="bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSubject(4, 'Tiếng Anh B1')"><i class="bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Thêm môn học -->
+<div class="modal fade" id="addSubjectModal" tabindex="-1">
+    <div class="modal-dialog" style="margin-top:120px;">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 bg-primary text-white">
+                <h5 class="modal-title"><i class="bi-plus-circle-fill me-2"></i>Thêm môn học mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mã môn học</label>
+                    <input type="text" id="subjectCode" class="form-control" placeholder="VD: CNTT101">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên môn học</label>
+                    <input type="text" id="subjectName" class="form-control" placeholder="VD: Lập trình Web">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Số tín chỉ</label>
+                    <input type="number" id="subjectCredits" class="form-control" value="3">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Khoa</label>
+                    <select id="subjectDepartment" class="form-select">
+                        <option>Khoa CNTT</option>
+                        <option>Khoa Toán</option>
+                        <option>Khoa Vật lý</option>
+                        <option>Khoa Ngoại ngữ</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mô tả</label>
+                    <textarea class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="addSubject()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Sửa môn học -->
+<div class="modal fade" id="editSubjectModal" tabindex="-1">
+    <div class="modal-dialog" style="margin-top:120px;">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="bi-pencil-square me-2"></i>Sửa môn học
+                </h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editSubjectId">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mã môn học</label>
+                    <input type="text" id="editSubjectCode"
+                           class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên môn học</label>
+                    <input type="text" id="editSubjectName"
+                           class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Số tín chỉ</label>
+                    <input type="number" id="editSubjectCredits"
+                           class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Khoa</label>
+                    <select id="editSubjectDepartment"
+                            class="form-select">
+                        <option>Khoa CNTT</option>
+                        <option>Khoa Toán</option>
+                        <option>Khoa Vật lý</option>
+                        <option>Khoa Ngoại ngữ</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Trạng thái</label>
+                    <select id="editSubjectStatus"
+                            class="form-select">
+                        <option>Hoạt động</option>
+                        <option>Tạm dừng</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Hủy
+                </button>
+
+                <button type="button"
+                        class="btn btn-warning"
+                        onclick="updateSubject()">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/admin-functions.js"></script>
+}
