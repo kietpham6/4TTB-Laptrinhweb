@@ -1,0 +1,300 @@
+﻿@{
+    ViewData["Title"] = "Xếp hạng";
+}
+
+<section class="services-section section-padding">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>🏆 Bảng xếp hạng học viên</h2>
+                <p class="text-muted">Xem thành tích và so sánh với các học viên khác</p>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <select class="form-select" id="rankingSubject" onchange="filterRanking()">
+                            <option value="all">Tất cả môn học</option>
+                            <option value="Lập trình Web">Lập trình Web</option>
+                            <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Toán cao cấp">Toán cao cấp</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="rankingPeriod" onchange="filterRanking()">
+                            <option value="all">Tất cả thời gian</option>
+                            <option value="month">Tháng này</option>
+                            <option value="quarter">Quý này</option>
+                            <option value="year">Năm nay</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                            <i class="bi-arrow-repeat me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 3 -->
+        <div class="row g-4 mb-5 text-center" id="top3Container">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 bg-secondary bg-opacity-10">
+                    <div class="card-body p-4">
+                        <div class="display-1 mb-3">🥈</div>
+                        <img src="https://ui-avatars.com/api/?background=6c757d&color=fff&size=80&rounded=true&name=Trần+Thị+B" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        <h4>Trần Thị B</h4>
+                        <p class="text-muted">Điểm TB: <strong>8.9</strong></p>
+                        <span class="badge bg-secondary">Hạng 2</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg rounded-4 bg-warning bg-opacity-10">
+                    <div class="card-body p-4">
+                        <div class="display-1 mb-3">🥇</div>
+                        <img src="https://ui-avatars.com/api/?background=ffc107&color=fff&size=80&rounded=true&name=Nguyễn+Văn+A" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        <h4>Nguyễn Văn A</h4>
+                        <p class="text-muted">Điểm TB: <strong>9.5</strong></p>
+                        <span class="badge bg-warning text-dark">Hạng 1</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 bg-info bg-opacity-10">
+                    <div class="card-body p-4">
+                        <div class="display-1 mb-3">🥉</div>
+                        <img src="https://ui-avatars.com/api/?background=0dcaf0&color=fff&size=80&rounded=true&name=Lê+Văn+C" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        <h4>Lê Văn C</h4>
+                        <p class="text-muted">Điểm TB: <strong>8.5</strong></p>
+                        <span class="badge bg-info">Hạng 3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách xếp hạng chi tiết -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="mb-0">📊 Bảng xếp hạng chi tiết</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="rankingTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Hạng</th>
+                                <th>Học viên</th>
+                                <th>Số bài thi</th>
+                                <th>Điểm TB</th>
+                                <th>Cao nhất</th>
+                                <th>Xu hướng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 pt-3 pb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted" id="resultCount">📊 Hiển thị 0 của 0 học viên</span>
+                    <div id="yourRankInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // DỮ LIỆU ẢO CHO BẢNG XẾP HẠNG
+    var rankingData = [
+        { rank: 1, name: "Nguyễn Văn A", exams: 12, avgScore: 9.5, highest: 10, lowest: 8.5, trend: "up", trendValue: "+2", subject: "Lập trình Web", period: "all", avatar: "https://ui-avatars.com/api/?background=ffc107&color=fff&size=35&rounded=true&name=Nguyễn+Văn+A" },
+        { rank: 2, name: "Trần Thị B", exams: 10, avgScore: 8.9, highest: 9.5, lowest: 8.0, trend: "up", trendValue: "+1", subject: "Lập trình Web", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Trần+Thị+B" },
+        { rank: 3, name: "Lê Văn C", exams: 8, avgScore: 8.5, highest: 9.0, lowest: 7.5, trend: "down", trendValue: "-1", subject: "Cơ sở dữ liệu", period: "all", avatar: "https://ui-avatars.com/api/?background=0dcaf0&color=fff&size=35&rounded=true&name=Lê+Văn+C" },
+        { rank: 4, name: "Phạm Thị D", exams: 15, avgScore: 8.2, highest: 9.0, lowest: 7.0, trend: "up", trendValue: "+3", subject: "Tiếng Anh", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Phạm+Thị+D" },
+        { rank: 5, name: "Hoàng Văn E", exams: 6, avgScore: 7.8, highest: 8.5, lowest: 7.0, trend: "down", trendValue: "-2", subject: "Toán cao cấp", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Hoàng+Văn+E" },
+        { rank: 6, name: "Vũ Thị F", exams: 9, avgScore: 7.5, highest: 8.0, lowest: 7.0, trend: "up", trendValue: "+1", subject: "Lập trình Web", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Vũ+Thị+F" },
+        { rank: 7, name: "Đặng Văn G", exams: 7, avgScore: 7.2, highest: 7.5, lowest: 6.5, trend: "down", trendValue: "-1", subject: "Cơ sở dữ liệu", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Đặng+Văn+G" },
+        { rank: 8, name: "Bùi Thị H", exams: 11, avgScore: 7.0, highest: 7.5, lowest: 6.0, trend: "up", trendValue: "+2", subject: "Tiếng Anh", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Bùi+Thị+H" },
+        { rank: 9, name: "Đỗ Văn I", exams: 5, avgScore: 6.8, highest: 7.0, lowest: 6.5, trend: "down", trendValue: "-1", subject: "Toán cao cấp", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Đỗ+Văn+I" },
+        { rank: 10, name: "Ngô Thị K", exams: 8, avgScore: 6.5, highest: 7.0, lowest: 6.0, trend: "stable", trendValue: "0", subject: "Lập trình Web", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Ngô+Thị+K" },
+        { rank: 11, name: "Mai Văn L", exams: 4, avgScore: 6.2, highest: 6.5, lowest: 6.0, trend: "down", trendValue: "-2", subject: "Cơ sở dữ liệu", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Mai+Văn+L" },
+        { rank: 12, name: "Lý Thị M", exams: 6, avgScore: 6.0, highest: 6.5, lowest: 5.5, trend: "up", trendValue: "+1", subject: "Tiếng Anh", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Lý+Thị+M" },
+        { rank: 13, name: "Trịnh Văn N", exams: 3, avgScore: 5.8, highest: 6.0, lowest: 5.5, trend: "down", trendValue: "-1", subject: "Toán cao cấp", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Trịnh+Văn+N" },
+        { rank: 14, name: "Hồ Thị P", exams: 5, avgScore: 5.5, highest: 6.0, lowest: 5.0, trend: "up", trendValue: "+1", subject: "Lập trình Web", period: "all", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Hồ+Thị+P" },
+        { rank: 15, name: "Bạn", exams: 8, avgScore: 7.5, highest: 8.5, lowest: 6.5, trend: "up", trendValue: "+5", subject: "all", period: "all", avatar: "https://ui-avatars.com/api/?background=667eea&color=fff&size=35&rounded=true&name=You" }
+    ];
+
+    // Dữ liệu theo môn học
+    var rankingBySubject = {
+        "Lập trình Web": [
+            { rank: 1, name: "Nguyễn Văn A", exams: 5, avgScore: 9.8, highest: 10, lowest: 9.0, trend: "up", trendValue: "+1", avatar: "https://ui-avatars.com/api/?background=ffc107&color=fff&size=35&rounded=true&name=Nguyễn+Văn+A" },
+            { rank: 2, name: "Trần Thị B", exams: 4, avgScore: 9.2, highest: 9.5, lowest: 8.5, trend: "up", trendValue: "+2", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Trần+Thị+B" },
+            { rank: 3, name: "Vũ Thị F", exams: 3, avgScore: 8.5, highest: 9.0, lowest: 8.0, trend: "up", trendValue: "+1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Vũ+Thị+F" },
+            { rank: 4, name: "Ngô Thị K", exams: 3, avgScore: 8.0, highest: 8.5, lowest: 7.5, trend: "stable", trendValue: "0", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Ngô+Thị+K" },
+            { rank: 5, name: "Bạn", exams: 3, avgScore: 7.8, highest: 8.0, lowest: 7.5, trend: "up", trendValue: "+2", avatar: "https://ui-avatars.com/api/?background=667eea&color=fff&size=35&rounded=true&name=You" }
+        ],
+        "Cơ sở dữ liệu": [
+            { rank: 1, name: "Lê Văn C", exams: 4, avgScore: 9.0, highest: 9.5, lowest: 8.5, trend: "up", trendValue: "+1", avatar: "https://ui-avatars.com/api/?background=0dcaf0&color=fff&size=35&rounded=true&name=Lê+Văn+C" },
+            { rank: 2, name: "Phạm Thị D", exams: 3, avgScore: 8.5, highest: 9.0, lowest: 8.0, trend: "down", trendValue: "-1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Phạm+Thị+D" },
+            { rank: 3, name: "Đặng Văn G", exams: 3, avgScore: 7.8, highest: 8.0, lowest: 7.5, trend: "down", trendValue: "-2", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Đặng+Văn+G" },
+            { rank: 4, name: "Mai Văn L", exams: 3, avgScore: 7.0, highest: 7.5, lowest: 6.5, trend: "down", trendValue: "-1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Mai+Văn+L" }
+        ],
+        "Tiếng Anh": [
+            { rank: 1, name: "Phạm Thị D", exams: 4, avgScore: 9.0, highest: 9.5, lowest: 8.5, trend: "up", trendValue: "+2", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Phạm+Thị+D" },
+            { rank: 2, name: "Bùi Thị H", exams: 3, avgScore: 8.5, highest: 9.0, lowest: 8.0, trend: "up", trendValue: "+1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Bùi+Thị+H" },
+            { rank: 3, name: "Lý Thị M", exams: 3, avgScore: 7.8, highest: 8.0, lowest: 7.5, trend: "up", trendValue: "+1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Lý+Thị+M" },
+            { rank: 4, name: "Bạn", exams: 2, avgScore: 8.2, highest: 8.5, lowest: 8.0, trend: "up", trendValue: "+3", avatar: "https://ui-avatars.com/api/?background=667eea&color=fff&size=35&rounded=true&name=You" }
+        ],
+        "Toán cao cấp": [
+            { rank: 1, name: "Hoàng Văn E", exams: 3, avgScore: 8.8, highest: 9.0, lowest: 8.5, trend: "up", trendValue: "+1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Hoàng+Văn+E" },
+            { rank: 2, name: "Đỗ Văn I", exams: 3, avgScore: 7.5, highest: 8.0, lowest: 7.0, trend: "down", trendValue: "-1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Đỗ+Văn+I" },
+            { rank: 3, name: "Trịnh Văn N", exams: 2, avgScore: 6.8, highest: 7.0, lowest: 6.5, trend: "down", trendValue: "-1", avatar: "https://ui-avatars.com/api/?background=6c757d&color=fff&size=35&rounded=true&name=Trịnh+Văn+N" }
+        ]
+    };
+
+    function filterRanking() {
+        var subject = document.getElementById('rankingSubject').value;
+        var period = document.getElementById('rankingPeriod').value;
+        var filteredData = [];
+
+        // Chọn dữ liệu theo môn học
+        if (subject !== 'all' && rankingBySubject[subject]) {
+            filteredData = JSON.parse(JSON.stringify(rankingBySubject[subject]));
+        } else if (subject !== 'all' && !rankingBySubject[subject]) {
+            filteredData = [];
+        } else {
+            filteredData = JSON.parse(JSON.stringify(rankingData));
+        }
+
+        // Lọc theo thời gian (mô phỏng)
+        if (period === 'month') {
+            filteredData = filteredData.map(function(item) {
+                var newItem = JSON.parse(JSON.stringify(item));
+                newItem.avgScore = (parseFloat(newItem.avgScore) * 0.95).toFixed(1);
+                return newItem;
+            });
+        } else if (period === 'quarter') {
+            filteredData = filteredData.map(function(item) {
+                var newItem = JSON.parse(JSON.stringify(item));
+                newItem.avgScore = (parseFloat(newItem.avgScore) * 0.98).toFixed(1);
+                return newItem;
+            });
+        } else if (period === 'year') {
+            filteredData = filteredData.map(function(item) {
+                var newItem = JSON.parse(JSON.stringify(item));
+                newItem.avgScore = (parseFloat(newItem.avgScore) * 0.9).toFixed(1);
+                return newItem;
+            });
+        }
+
+        // Sắp xếp theo điểm
+        filteredData.sort(function(a, b) {
+            return parseFloat(b.avgScore) - parseFloat(a.avgScore);
+        });
+
+        // Cập nhật lại hạng
+        for (var i = 0; i < filteredData.length; i++) {
+            filteredData[i].rank = i + 1;
+        }
+
+        renderRankingTable(filteredData);
+        updateTop3(filteredData);
+        updateYourRank(filteredData, subject, period);
+    }
+
+    function renderRankingTable(data) {
+        var tbody = document.getElementById('rankingTableBody');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">📭 Không có dữ liệu xếp hạng!</td></tr>';
+            document.getElementById('resultCount').innerHTML = '📊 Hiển thị 0 của 0 học viên';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            var rowClass = '';
+            if (item.rank === 1) rowClass = 'table-warning';
+            else if (item.rank === 2) rowClass = 'table-secondary';
+            else if (item.rank === 3) rowClass = 'table-info';
+            else if (item.name === 'Bạn') rowClass = 'table-active';
+
+            var trendIcon = '';
+            if (item.trend === 'up') trendIcon = '<i class="bi-arrow-up-short text-success"></i> ' + (item.trendValue || '+');
+            else if (item.trend === 'down') trendIcon = '<i class="bi-arrow-down-short text-danger"></i> ' + (item.trendValue || '-');
+            else trendIcon = '<i class="bi-dash text-secondary"></i> ' + (item.trendValue || '0');
+
+            var avatarUrl = item.avatar || 'https://ui-avatars.com/api/?background=6c757d&color=fff&size=30&rounded=true&name=' + encodeURIComponent(item.name);
+
+            var row = '<tr class="' + rowClass + '">' +
+                '<td class="fw-bold">' + item.rank + '</td>' +
+                '<td><img src="' + avatarUrl + '" class="rounded-circle me-2" style="width: 30px; height: 30px;"> ' + item.name + '</td>' +
+                '<td>' + item.exams + '</td>' +
+                '<td class="fw-bold ' + (parseFloat(item.avgScore) >= 8 ? 'text-success' : (parseFloat(item.avgScore) >= 5 ? 'text-warning' : 'text-danger')) + '">' + item.avgScore + '</td>' +
+                '<td>' + item.highest + '</td>' +
+                '<td>' + trendIcon + '</td>' +
+                '</tr>';
+            tbody.innerHTML += row;
+        }
+
+        document.getElementById('resultCount').innerHTML = '📊 Hiển thị ' + data.length + ' của ' + (data.length === rankingData.length ? '15' : data.length) + ' học viên';
+    }
+
+    function updateTop3(data) {
+        var top3Container = document.getElementById('top3Container');
+        if (!data || data.length < 3) return;
+
+        var html = '';
+        var medals = ['🥈', '🥇', '🥉'];
+        var badgeClasses = ['bg-secondary', 'bg-warning text-dark', 'bg-info'];
+
+        for (var i = 0; i < 3; i++) {
+            var item = data[i];
+            var medalIndex = i === 0 ? 1 : (i === 1 ? 0 : 2);
+            html += '<div class="col-md-4">' +
+                '<div class="card border-0 shadow-sm rounded-4 ' + (i === 0 ? 'bg-warning bg-opacity-10' : (i === 1 ? 'bg-secondary bg-opacity-10' : 'bg-info bg-opacity-10')) + '">' +
+                '<div class="card-body p-4 text-center">' +
+                '<div class="display-1 mb-3">' + medals[medalIndex] + '</div>' +
+                '<img src="' + (item.avatar || 'https://ui-avatars.com/api/?background=6c757d&color=fff&size=80&rounded=true&name=' + encodeURIComponent(item.name)) + '" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">' +
+                '<h4>' + item.name + '</h4>' +
+                '<p class="text-muted">Điểm TB: <strong>' + item.avgScore + '</strong></p>' +
+                '<span class="badge ' + badgeClasses[medalIndex] + '">Hạng ' + (i + 1) + '</span>' +
+                '</div></div></div>';
+        }
+        top3Container.innerHTML = html;
+    }
+
+    function updateYourRank(data, subject, period) {
+        var yourRankInfo = document.getElementById('yourRankInfo');
+        var yourData = null;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].name === 'Bạn') {
+                yourData = data[i];
+                break;
+            }
+        }
+
+        if (yourData) {
+            yourRankInfo.innerHTML = '<span class="badge bg-primary">📌 Vị trí của bạn: #' + yourData.rank + ' - Điểm TB: ' + yourData.avgScore + '</span>';
+        } else {
+            yourRankInfo.innerHTML = '<span class="badge bg-secondary">📌 Bạn chưa có trong bảng xếp hạng này</span>';
+        }
+    }
+
+    function resetFilters() {
+        document.getElementById('rankingSubject').value = 'all';
+        document.getElementById('rankingPeriod').value = 'all';
+        filterRanking();
+    }
+
+    // Khởi tạo bảng khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterRanking();
+    });
+</script>
