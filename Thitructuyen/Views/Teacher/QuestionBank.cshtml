@@ -1,0 +1,514 @@
+﻿@{
+    ViewData["Title"] = "Ngân hàng câu hỏi";
+}
+
+<section class="services-section section-padding section-bg">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2>📖 Ngân hàng câu hỏi</h2>
+                        <p class="text-muted">Quản lý câu hỏi theo môn học, chương và độ khó</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+                            <i class="bi-plus-lg me-2"></i>Thêm câu hỏi
+                        </button>
+                        <button class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                            <i class="bi-file-excel me-2"></i>Import Excel
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <i class="bi-download me-2"></i>Export Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bộ lọc - ĐÃ SỬA LỖI -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold mb-1">Môn học</label>
+                        <select class="form-select" id="filterSubject" onchange="filterQuestions()">
+                            <option value="all">Tất cả môn học</option>
+                            <option value="Lập trình Web">Lập trình Web</option>
+                            <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Toán cao cấp">Toán cao cấp</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold mb-1">Chương học</label>
+                        <select class="form-select" id="filterChapter" onchange="filterQuestions()">
+                            <option value="all">Tất cả chương</option>
+                            <option value="HTML/CSS">HTML/CSS</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="SQL cơ bản">SQL cơ bản</option>
+                            <option value="Ngữ pháp">Ngữ pháp</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold mb-1">Độ khó</label>
+                        <select class="form-select" id="filterDifficulty" onchange="filterQuestions()">
+                            <option value="all">Tất cả</option>
+                            <option value="Dễ">Dễ</option>
+                            <option value="TB">Trung bình</option>
+                            <option value="Khó">Khó</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold mb-1">Loại câu hỏi</label>
+                        <select class="form-select" id="filterType" onchange="filterQuestions()">
+                            <option value="all">Tất cả</option>
+                            <option value="Trắc nghiệm">Trắc nghiệm</option>
+                            <option value="Tự luận">Tự luận</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold mb-1">&nbsp;</label>
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                            <i class="bi-arrow-repeat me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="🔍 Tìm kiếm câu hỏi theo nội dung..." onkeyup="filterQuestions()">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100" onclick="filterQuestions()">
+                            <i class="bi-search me-1"></i>Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê nhanh -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 bg-primary bg-opacity-10 rounded-4">
+                    <div class="card-body text-center p-3">
+                        <h3 class="text-primary mb-0" id="totalCount">5</h3>
+                        <small class="text-muted">Tổng số câu hỏi</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-success bg-opacity-10 rounded-4">
+                    <div class="card-body text-center p-3">
+                        <h3 class="text-success mb-0" id="easyCount">3</h3>
+                        <small class="text-muted">Câu dễ</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-warning bg-opacity-10 rounded-4">
+                    <div class="card-body text-center p-3">
+                        <h3 class="text-warning mb-0" id="mediumCount">1</h3>
+                        <small class="text-muted">Câu trung bình</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-danger bg-opacity-10 rounded-4">
+                    <div class="card-body text-center p-3">
+                        <h3 class="text-danger mb-0" id="hardCount">1</h3>
+                        <small class="text-muted">Câu khó</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng câu hỏi -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Danh sách câu hỏi</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-danger" onclick="bulkDelete()">
+                            <i class="bi-trash me-1"></i>Xóa đã chọn
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 30px"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                                <th>ID</th>
+                                <th>Câu hỏi</th>
+                                <th>Môn học</th>
+                                <th>Chương</th>
+                                <th>Độ khó</th>
+                                <th>Loại</th>
+                                <th>Điểm</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questionTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 pt-3 pb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted" id="selectedCount">✅ Đã chọn 0 câu hỏi</span>
+                        <span class="text-muted ms-3" id="resultCount">📊 Hiển thị 0 của 0 câu hỏi</span>
+                    </div>
+                    <div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="pagination">
+                                <li class="page-item disabled"><a class="page-link" href="#">«</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">»</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Thêm câu hỏi -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg" style="margin-top:120px;">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 bg-primary text-white">
+                <h5 class="modal-title"><i class="bi-plus-circle-fill me-2"></i>Thêm câu hỏi mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addQuestionForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nội dung câu hỏi <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="questionContent" rows="3" placeholder="Nhập nội dung câu hỏi..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Môn học <span class="text-danger">*</span></label>
+                                <select class="form-select" id="questionSubject">
+                                    <option value="">-- Chọn môn học --</option>
+                                    <option value="Lập trình Web">Lập trình Web</option>
+                                    <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+                                    <option value="Tiếng Anh">Tiếng Anh</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Chương học</label>
+                                <input type="text" class="form-control" id="questionChapter" placeholder="VD: Chương 1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Độ khó <span class="text-danger">*</span></label>
+                                <select class="form-select" id="questionDifficulty">
+                                    <option value="Dễ">Dễ</option>
+                                    <option value="TB">Trung bình</option>
+                                    <option value="Khó">Khó</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Loại câu hỏi <span class="text-danger">*</span></label>
+                                <select class="form-select" id="questionType">
+                                    <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                    <option value="Tự luận">Tự luận</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Điểm số</label>
+                                <input type="number" class="form-control" id="questionPoints" value="1" step="0.5">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="multipleChoiceArea">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Đáp án A</label>
+                                    <input type="text" class="form-control" id="optionA" placeholder="Nhập đáp án A">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Đáp án B</label>
+                                    <input type="text" class="form-control" id="optionB" placeholder="Nhập đáp án B">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Đáp án C</label>
+                                    <input type="text" class="form-control" id="optionC" placeholder="Nhập đáp án C">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Đáp án D</label>
+                                    <input type="text" class="form-control" id="optionD" placeholder="Nhập đáp án D">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Đáp án đúng</label>
+                            <select class="form-select" id="correctAnswer">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddQuestion()">Thêm câu hỏi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Import Excel -->
+<div class="modal fade" id="importExcelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 bg-success text-white">
+                <h5 class="modal-title"><i class="bi-file-excel-fill me-2"></i>Import câu hỏi từ Excel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi-info-circle-fill me-2"></i>
+                    <strong>Hướng dẫn:</strong> File Excel cần có các cột: Nội dung, Môn học, Độ khó, Loại câu hỏi, Đáp án A, Đáp án B, Đáp án C, Đáp án D, Đáp án đúng, Điểm số
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Chọn file Excel</label>
+                    <input type="file" class="form-control" accept=".xlsx, .xls">
+                </div>
+                <div class="mb-3">
+                    <a href="#" class="text-primary">
+                        <i class="bi-download me-1"></i>Tải file mẫu Excel
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" onclick="importExcel()">Import dữ liệu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu mẫu
+    let questionsData = [
+        { id: 1, content: "HTML là viết tắt của từ gì?", subject: "Lập trình Web", chapter: "HTML/CSS", difficulty: "Dễ", type: "Trắc nghiệm", points: 1, optionA: "Hyper Text Markup Language", optionB: "Hyper Tool Markup Language", optionC: "Home Text Markup Language", optionD: "None", correctAnswer: "A" },
+        { id: 2, content: "CSS dùng để làm gì?", subject: "Lập trình Web", chapter: "HTML/CSS", difficulty: "Dễ", type: "Trắc nghiệm", points: 1, optionA: "Xử lý dữ liệu", optionB: "Trang trí giao diện", optionC: "Kết nối database", optionD: "Xử lý form", correctAnswer: "B" },
+        { id: 3, content: "Trong SQL, câu lệnh nào dùng để truy vấn dữ liệu?", subject: "Cơ sở dữ liệu", chapter: "SQL cơ bản", difficulty: "TB", type: "Trắc nghiệm", points: 1, optionA: "INSERT", optionB: "UPDATE", optionC: "SELECT", optionD: "DELETE", correctAnswer: "C" },
+        { id: 4, content: "JavaScript là ngôn ngữ lập trình gì?", subject: "Lập trình Web", chapter: "JavaScript", difficulty: "Dễ", type: "Trắc nghiệm", points: 1, optionA: "Backend", optionB: "Frontend", optionC: "Database", optionD: "Server", correctAnswer: "B" },
+        { id: 5, content: "Trình bày khái niệm về MVC trong ASP.NET Core?", subject: "Lập trình Web", chapter: "ASP.NET Core", difficulty: "Khó", type: "Tự luận", points: 2, optionA: "", optionB: "", optionC: "", optionD: "", correctAnswer: "" }
+    ];
+
+    let filteredQuestions = [...questionsData];
+    let currentPage = 1;
+    let rowsPerPage = 5;
+
+    function filterQuestions() {
+        const subject = document.getElementById('filterSubject').value;
+        const chapter = document.getElementById('filterChapter').value;
+        const difficulty = document.getElementById('filterDifficulty').value;
+        const type = document.getElementById('filterType').value;
+        const search = document.getElementById('searchKeyword').value.toLowerCase();
+
+        filteredQuestions = questionsData.filter(q => {
+            let match = true;
+            if (subject !== 'all' && q.subject !== subject) match = false;
+            if (chapter !== 'all' && q.chapter !== chapter) match = false;
+            if (difficulty !== 'all' && q.difficulty !== difficulty) match = false;
+            if (type !== 'all' && q.type !== type) match = false;
+            if (search && !q.content.toLowerCase().includes(search)) match = false;
+            return match;
+        });
+
+        // Cập nhật thống kê
+        const easy = filteredQuestions.filter(q => q.difficulty === 'Dễ').length;
+        const medium = filteredQuestions.filter(q => q.difficulty === 'TB').length;
+        const hard = filteredQuestions.filter(q => q.difficulty === 'Khó').length;
+
+        document.getElementById('totalCount').innerText = filteredQuestions.length;
+        document.getElementById('easyCount').innerText = easy;
+        document.getElementById('mediumCount').innerText = medium;
+        document.getElementById('hardCount').innerText = hard;
+        document.getElementById('resultCount').innerHTML = `📊 Hiển thị ${filteredQuestions.length} của ${questionsData.length} câu hỏi`;
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('questionTableBody');
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = filteredQuestions.slice(start, end);
+
+        if (pageData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">📭 Không tìm thấy câu hỏi nào!</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        pageData.forEach(q => {
+            const difficultyClass = q.difficulty === 'Dễ' ? 'bg-success' : (q.difficulty === 'TB' ? 'bg-warning' : 'bg-danger');
+            const row = `<tr>
+                <td><input type="checkbox" class="questionCheckbox" data-id="${q.id}"></td>
+                <td>${q.id}</td>
+                <td>${q.content}</td>
+                <td>${q.subject}</td>
+                <td>${q.chapter || '-'}</td>
+                <td><span class="badge ${difficultyClass}">${q.difficulty}</span></td>
+                <td>${q.type}</td>
+                <td>${q.points}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editQuestion(${q.id})"><i class="bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(${q.id})"><i class="bi-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-info" onclick="viewQuestion(${q.id})"><i class="bi-eye"></i></button>
+                </td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredQuestions.length / rowsPerPage);
+        const pagination = document.getElementById('pagination');
+        if (totalPages <= 1) {
+            pagination.innerHTML = '<li class="page-item disabled"><a class="page-link" href="#">«</a></li><li class="page-item active"><a class="page-link" href="#">1</a></li><li class="page-item disabled"><a class="page-link" href="#">»</a></li>';
+            return;
+        }
+
+        let html = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="changePage(${currentPage - 1})">«</a></li>`;
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<li class="page-item ${currentPage === i ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+        }
+        html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="changePage(${currentPage + 1})">»</a></li>`;
+        pagination.innerHTML = html;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        renderTable();
+    }
+
+    function resetFilters() {
+        document.getElementById('filterSubject').value = 'all';
+        document.getElementById('filterChapter').value = 'all';
+        document.getElementById('filterDifficulty').value = 'all';
+        document.getElementById('filterType').value = 'all';
+        document.getElementById('searchKeyword').value = '';
+        filterQuestions();
+    }
+
+    function toggleSelectAll() {
+        const all = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.questionCheckbox').forEach(cb => cb.checked = all);
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.questionCheckbox:checked').length;
+        document.getElementById('selectedCount').innerHTML = `✅ Đã chọn ${count} câu hỏi`;
+    }
+
+    function bulkDelete() {
+        const checked = document.querySelectorAll('.questionCheckbox:checked');
+        if (checked.length === 0) return;
+        if (confirm(`Bạn có chắc muốn xóa ${checked.length} câu hỏi đã chọn?`)) {
+            checked.forEach(cb => {
+                const id = parseInt(cb.getAttribute('data-id'));
+                const index = questionsData.findIndex(q => q.id === id);
+                if (index !== -1) questionsData.splice(index, 1);
+            });
+            filterQuestions();
+            updateSelectedCount();
+        }
+    }
+
+    function submitAddQuestion() {
+        const content = document.getElementById('questionContent').value;
+        if (!content) {
+            alert('Vui lòng nhập nội dung câu hỏi!');
+            return;
+        }
+
+        const newId = questionsData.length + 1;
+        const newQuestion = {
+            id: newId,
+            content: content,
+            subject: document.getElementById('questionSubject').value,
+            chapter: document.getElementById('questionChapter').value,
+            difficulty: document.getElementById('questionDifficulty').value,
+            type: document.getElementById('questionType').value,
+            points: parseInt(document.getElementById('questionPoints').value),
+            optionA: document.getElementById('optionA').value,
+            optionB: document.getElementById('optionB').value,
+            optionC: document.getElementById('optionC').value,
+            optionD: document.getElementById('optionD').value,
+            correctAnswer: document.getElementById('correctAnswer').value
+        };
+
+        questionsData.push(newQuestion);
+        alert('Thêm câu hỏi thành công!');
+        $('#addQuestionModal').modal('hide');
+        document.getElementById('addQuestionForm').reset();
+        filterQuestions();
+    }
+
+    function editQuestion(id) {
+        alert('Chỉnh sửa câu hỏi ID: ' + id);
+    }
+
+    function deleteQuestion(id) {
+        if (confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
+            const index = questionsData.findIndex(q => q.id === id);
+            if (index !== -1) questionsData.splice(index, 1);
+            filterQuestions();
+        }
+    }
+
+    function viewQuestion(id) {
+        const q = questionsData.find(q => q.id === id);
+        if (q) {
+            alert(`Chi tiết câu hỏi:\n\nNội dung: ${q.content}\nMôn học: ${q.subject}\nĐộ khó: ${q.difficulty}\nĐiểm: ${q.points}`);
+        }
+    }
+
+    function importExcel() {
+        alert('Import dữ liệu thành công!');
+        $('#importExcelModal').modal('hide');
+    }
+
+    // Khởi tạo
+    document.addEventListener('DOMContentLoaded', function() {
+        filterQuestions();
+    });
+</script>

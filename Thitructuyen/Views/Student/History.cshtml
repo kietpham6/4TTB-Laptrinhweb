@@ -1,0 +1,230 @@
+﻿@{
+    ViewData["Title"] = "Lịch sử thi";
+}
+
+<section class="intro-section section-padding" style="margin-top:120px;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>📜 Lịch sử thi của bạn</h2>
+                <p class="text-muted">Xem lại các bài thi đã tham gia và kết quả</p>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <select class="form-select" id="filterSubject" onchange="loadHistory()">
+                            <option value="">Tất cả môn học</option>
+                            <option value="Lập trình Web">Lập trình Web</option>
+                            <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="month" class="form-control" id="filterMonth" onchange="loadHistory()" placeholder="Chọn tháng">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetHistoryFilters()">
+                            <i class="bi-arrow-repeat me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách kết quả -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="mb-0">📋 Kết quả các bài thi đã tham gia</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">STT</th>
+                                <th>Tên bài thi</th>
+                                <th>Môn học</th>
+                                <th>Ngày thi</th>
+                                <th>Điểm</th>
+                                <th>Xếp hạng</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center pe-4">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Chi tiết -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg" style="margin-top:120px;">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="detailModalTitle">Chi tiết kết quả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="printResult()">
+                    <i class="bi-printer me-1"></i>In kết quả
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadHistory() {
+        const subject = document.getElementById('filterSubject').value;
+        const month = document.getElementById('filterMonth').value;
+
+        let url = '/api/Api/history';
+        let params = [];
+        if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
+        if (month) params.push(`month=${encodeURIComponent(month)}`);
+        if (params.length > 0) url += '?' + params.join('&');
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                renderHistoryTable(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Lỗi tải dữ liệu!</td></tr>';
+            });
+    }
+
+    function renderHistoryTable(history) {
+        const tbody = document.getElementById('historyTableBody');
+        if (!history || history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Không có dữ liệu</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        history.forEach((item, index) => {
+            const row = tbody.insertRow();
+            const scoreClass = item.score >= 8 ? 'text-success' : (item.score >= 5 ? 'text-warning' : 'text-danger');
+
+            row.innerHTML = `
+                <td class="ps-4">${index + 1}</td>
+                <td>${item.title}</td>
+                <td>${item.subject}</td>
+                <td>${item.date}</td>
+                <td class="fw-bold ${scoreClass}">${item.score}</td>
+                <td>${item.ranking}</td>
+                <td><span class="badge bg-success">${item.status}</span></td>
+                <td class="text-center pe-4">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${item.id})">
+                        <i class="bi-eye me-1"></i>Xem chi tiết
+                    </button>
+                </td>
+            `;
+        });
+    }
+
+    function resetHistoryFilters() {
+        document.getElementById('filterSubject').value = '';
+        document.getElementById('filterMonth').value = '';
+        loadHistory();
+    }
+
+    function viewDetail(id) {
+        $('#detailModal').modal('show');
+        document.getElementById('detailModalBody').innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+
+        fetch(`/api/Api/history/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                let answersHtml = '';
+                data.answers.forEach((a, idx) => {
+                    const statusIcon = a.isCorrect ?
+                        '<i class="bi-check-circle-fill text-success"></i> Đúng' :
+                        '<i class="bi-x-circle-fill text-danger"></i> Sai';
+
+                    answersHtml += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>${a.question}</td>
+                            <td>${a.userAnswer}</td>
+                            <td>${a.correctAnswer}</td>
+                            <td>${statusIcon}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('detailModalBody').innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 text-center">
+                                <small class="text-muted">Tổng điểm</small>
+                                <h2 class="text-primary mb-0">${data.score}</h2>
+                                <span>/10</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 text-center">
+                                <small class="text-muted">Xếp hạng</small>
+                                <h2 class="text-success mb-0">${data.ranking}</h2>
+                                <span>/${data.totalStudents} học viên</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">📝 Nhận xét từ giáo viên:</label>
+                        <p class="border rounded-3 p-3 bg-light">${data.teacherComment}</p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr><th>#</th><th>Câu hỏi</th><th>Đáp án của bạn</th><th>Đáp án đúng</th><th>Kết quả</th></tr>
+                            </thead>
+                            <tbody>${answersHtml}</tbody>
+                        </table>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('detailModalBody').innerHTML = '<p class="text-danger text-center">Lỗi tải chi tiết!</p>';
+            });
+    }
+
+    function printResult() {
+        window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadHistory();
+    });
+</script>

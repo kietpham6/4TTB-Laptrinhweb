@@ -1,0 +1,181 @@
+﻿@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+}
+
+<section class="intro-section section-padding" style="margin-top:50px;>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>⚙️ Cấu hình hệ thống</h2>
+                <p class="text-muted">Quản lý các thông số và cài đặt của hệ thống</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Cấu hình chung -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">📋 Cấu hình chung</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tên hệ thống</label>
+                            <input type="text" class="form-control" value="Hệ thống thi trực tuyến">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Logo hệ thống</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="/Temp/images/logo.png">
+                                <button class="btn btn-outline-secondary" type="button">Chọn file</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Favicon</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="/Temp/images/favicon.ico">
+                                <button class="btn btn-outline-secondary" type="button">Chọn file</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Mô tả hệ thống</label>
+                            <textarea class="form-control" rows="3">Nền tảng thi trực tuyến đa môn học</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cấu hình Email -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">📧 Cấu hình Email (SMTP)</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">SMTP Server</label>
+                            <input type="text" class="form-control" value="smtp.gmail.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Cổng (Port)</label>
+                            <input type="text" class="form-control" value="587">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email gửi</label>
+                            <input type="email" class="form-control" value="no-reply@thitructuyen.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Mật khẩu</label>
+                            <input type="password" class="form-control" value="********">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="enableSSL" checked>
+                            <label class="form-check-label" for="enableSSL">Sử dụng SSL</label>
+                        </div>
+                        <button class="btn btn-outline-primary" onclick="testEmail()">
+                            <i class="bi-envelope-paper me-1"></i>Gửi email test
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cấu hình bảo mật -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">🔒 Cấu hình bảo mật</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="enableCaptcha" checked>
+                            <label class="form-check-label" for="enableCaptcha">Bật Captcha khi đăng nhập</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="enable2FA">
+                            <label class="form-check-label" for="enable2FA">Bật xác thực 2 lớp (2FA)</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Thời gian hết hạn session (phút)</label>
+                            <input type="number" class="form-control" value="30">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Số lần đăng nhập sai tối đa</label>
+                            <input type="number" class="form-control" value="5">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Thời gian khóa tài khoản (phút)</label>
+                            <input type="number" class="form-control" value="15">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cấu hình hiển thị -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">🎨 Cấu hình hiển thị</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Theme màu chính</label>
+                            <input type="color" class="form-control form-control-color w-100" value="#667eea">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Ngôn ngữ mặc định</label>
+                            <select class="form-select">
+                                <option value="vi">Tiếng Việt</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Số câu hỏi hiển thị mỗi trang</label>
+                            <select class="form-select">
+                                <option>10</option>
+                                <option selected>20</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="showResultImmediately" checked>
+                            <label class="form-check-label" for="showResultImmediately">Hiển thị kết quả ngay sau khi nộp bài</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="showAnswerAfterSubmit">
+                            <label class="form-check-label" for="showAnswerAfterSubmit">Hiển thị đáp án sau khi nộp bài</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 text-end">
+                <button class="btn btn-secondary me-2" onclick="resetSettings()">
+                    <i class="bi-arrow-clockwise me-1"></i>Khôi phục mặc định
+                </button>
+                <button class="btn btn-primary" onclick="saveSettings()">
+                    <i class="bi-save me-1"></i>Lưu cấu hình
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function testEmail() {
+        alert('Đã gửi email test! Vui lòng kiểm tra hộp thư.');
+    }
+
+    function resetSettings() {
+        if(confirm('Bạn có chắc muốn khôi phục cài đặt mặc định?')) {
+            alert('Đã khôi phục cài đặt mặc định');
+            location.reload();
+        }
+    }
+
+    function saveSettings() {
+        alert('Đã lưu cấu hình hệ thống thành công!');
+    }
+</script>

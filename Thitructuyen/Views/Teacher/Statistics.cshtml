@@ -1,0 +1,312 @@
+﻿@{
+    ViewData["Title"] = "Thống kê giảng viên";
+}
+
+<section class="services-section section-padding">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>📊 Thống kê giảng dạy</h2>
+                <p class="text-muted">Theo dõi kết quả học tập và đánh giá chất lượng đề thi</p>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <select class="form-select" id="filterExam" onchange="updateStatistics()">
+                            <option value="all">Tất cả đề thi</option>
+                            <option value="1">Kiểm tra giữa kỳ - Lập trình Web</option>
+                            <option value="2">Ôn tập cuối kỳ - Cơ sở dữ liệu</option>
+                            <option value="3">Đánh giá năng lực - Tiếng Anh</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="filterClass" onchange="updateStatistics()">
+                            <option value="all">Tất cả lớp</option>
+                            <option value="12A1">12A1</option>
+                            <option value="12A2">12A2</option>
+                            <option value="12A3">12A3</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                            <i class="bi-arrow-repeat me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê tổng quan -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Tổng học viên</h6>
+                                <h2 class="text-white mb-0" id="totalStudents">156</h2>
+                            </div>
+                            <i class="bi-people-fill fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Tổng đề thi</h6>
+                                <h2 class="text-white mb-0" id="totalExams">12</h2>
+                            </div>
+                            <i class="bi-file-text-fill fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-warning text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Lượt thi</h6>
+                                <h2 class="text-white mb-0" id="totalAttempts">345</h2>
+                            </div>
+                            <i class="bi-clock-history fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-1">Điểm TB chung</h6>
+                                <h2 class="text-white mb-0" id="avgOverall">7.8</h2>
+                            </div>
+                            <i class="bi-graph-up fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">📈 Biểu đồ phổ điểm</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <canvas id="scoreDistributionChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0">🍩 Tỷ lệ đỗ/rớt</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <canvas id="passRateChart" height="200"></canvas>
+                        <div class="text-center mt-3">
+                            <span class="badge bg-success me-2" id="passRate">Đỗ: 68%</span>
+                            <span class="badge bg-danger" id="failRate">Rớt: 32%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê theo đề thi -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="mb-0">📝 Thống kê theo đề thi</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Tên đề thi</th>
+                                <th>Số lượt thi</th>
+                                <th>Điểm TB</th>
+                                <th>Cao nhất</th>
+                                <th>Thấp nhất</th>
+                                <th>Tỷ lệ đỗ</th>
+                                <th class="text-center pe-4">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4">Kiểm tra giữa kỳ</td>
+                                <td>45</td>
+                                <td class="fw-bold text-success">7.8</td>
+                                <td>10</td>
+                                <td>4.5</td>
+                                <td><div class="progress" style="height: 5px;"><div class="progress-bar bg-success" style="width: 70%"></div></div>70%</td>
+                                <td class="text-center pe-4"><button class="btn btn-sm btn-outline-primary" onclick="viewExamDetail(1)"><i class="bi-eye"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4">Ôn tập cuối kỳ</td>
+                                <td>38</td>
+                                <td class="fw-bold text-warning">6.5</td>
+                                <td>9.5</td>
+                                <td>3.0</td>
+                                <td><div class="progress" style="height: 5px;"><div class="progress-bar bg-warning" style="width: 55%"></div></div>55%</td>
+                                <td class="text-center pe-4"><button class="btn btn-sm btn-outline-primary"><i class="bi-eye"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top học viên & Cần cải thiện -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0 text-success">🏆 Top 5 học viên xuất sắc</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr><th>Hạng</th><th>Học viên</th><th>Lớp</th><th>Điểm TB</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="fw-bold text-warning">1</td><td>Nguyễn Văn A</td><td>12A1</td><td class="text-success fw-bold">9.5</td></tr>
+                                    <tr><td class="fw-bold text-secondary">2</td><td>Trần Thị B</td><td>12A2</td><td class="text-success fw-bold">8.9</td></tr>
+                                    <tr><td class="fw-bold">3</td><td>Lê Văn C</td><td>12A1</td><td class="text-success fw-bold">8.5</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="mb-0 text-danger">⚠️ Học viên cần cải thiện</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr><th>Học viên</th><th>Lớp</th><th>Điểm TB</th><th>Số bài thi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Đỗ Văn I</td><td>12A3</td><td class="text-danger fw-bold">4.5</td><td>5</td></tr>
+                                    <tr><td>Trịnh Văn N</td><td>12A2</td><td class="text-danger fw-bold">5.0</td><td>4</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân tích câu hỏi -->
+        <div class="card border-0 shadow-sm rounded-4 mt-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="mb-0">📖 Phân tích câu hỏi (tỷ lệ đúng/sai)</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-danger">⚠️ Câu hỏi có tỷ lệ đúng thấp (cần lưu ý)</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Trình bày khái niệm về MVC trong ASP.NET Core?
+                                <span class="badge bg-danger rounded-pill">25% đúng</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Giải thích cách hoạt động của Entity Framework?
+                                <span class="badge bg-danger rounded-pill">30% đúng</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success">✅ Câu hỏi có tỷ lệ đúng cao (học sinh nắm tốt)</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                HTML là viết tắt của từ gì?
+                                <span class="badge bg-success rounded-pill">95% đúng</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                CSS dùng để làm gì?
+                                <span class="badge bg-success rounded-pill">88% đúng</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút xuất báo cáo -->
+        <div class="row mt-4">
+            <div class="col-12 text-end">
+                <button class="btn btn-outline-success me-2" onclick="exportReport()">
+                    <i class="bi-file-excel me-2"></i>Xuất báo cáo Excel
+                </button>
+                <button class="btn btn-outline-danger" onclick="exportPDF()">
+                    <i class="bi-file-pdf me-2"></i>Xuất báo cáo PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let scoreChart, passChart;
+
+        function updateStatistics() {
+            updateCharts();
+        }
+
+        function updateCharts() {
+            if (scoreChart) scoreChart.destroy();
+            if (passChart) passChart.destroy();
+
+            scoreChart = new Chart(document.getElementById('scoreDistributionChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['0-2', '2-4', '4-6', '6-8', '8-10'],
+                    datasets: [{ label: 'Số lượng học viên', data: [5, 12, 45, 89, 67], backgroundColor: '#667eea', borderRadius: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+            });
+
+            passChart = new Chart(document.getElementById('passRateChart'), {
+                type: 'doughnut',
+                data: { labels: ['Đỗ (≥5)', 'Rớt (<5)'], datasets: [{ data: [68, 32], backgroundColor: ['#28a745', '#dc3545'] }] }
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('filterExam').value = 'all';
+            document.getElementById('filterClass').value = 'all';
+            updateStatistics();
+        }
+
+        function viewExamDetail(id) {
+            alert('Xem chi tiết đề thi ID: ' + id);
+        }
+
+        function exportReport() { alert('Xuất báo cáo Excel!'); }
+        function exportPDF() { alert('Xuất báo cáo PDF!'); }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCharts();
+        });
+    </script>
+}
