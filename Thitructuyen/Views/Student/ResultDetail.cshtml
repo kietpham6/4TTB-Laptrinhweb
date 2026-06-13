@@ -1,0 +1,59 @@
+@model Thitructuyen.Models.ExamAttempt
+@{
+    ViewData["Title"] = "Chi tiết kết quả";
+    var answers = Model.Answers?.OrderBy(a => a.QuestionId).ToList() ?? new List<Thitructuyen.Models.Answer>();
+    var score = Model.Score ?? 0;
+    var passed = Model.Exam != null && score >= Model.Exam.PassScore;
+}
+<div class="pro-page-title no-print">
+    <div>
+        <h2>📄 Chi tiết kết quả bài thi</h2>
+        <p>Xem lại thông tin bài làm, điểm số, đáp án và nhật ký vi phạm.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" asp-action="ExportResultPdf" asp-route-attemptId="@Model.Id"><i class="bi-download me-1"></i> Tải bản in PDF</a>
+        <button class="btn btn-primary" onclick="window.print()"><i class="bi-printer me-1"></i> In / Lưu PDF</button>
+    </div>
+</div>
+
+<div class="chart-card mb-4">
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <img src="/images/main-logo.png" style="width:76px;height:76px;object-fit:contain" alt="Logo" />
+        <div>
+            <h3 class="mb-1">PHIẾU KẾT QUẢ BÀI THI</h3>
+            <div class="text-muted">Hệ thống Thi Trực Tuyến</div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><b>Học sinh:</b> @Model.Student?.FullName<br><b>Tài khoản:</b> @Model.Student?.Username<br><b>Email:</b> @Model.Student?.Email</div></div>
+        <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><b>Bài thi:</b> @Model.Exam?.Title<br><b>Môn học:</b> @Model.Exam?.Subject?.SubjectName<br><b>Thời gian nộp:</b> @(Model.SubmitTime?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa nộp")</div></div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4"><div class="metric-card"><div class="metric-icon"><i class="bi-award"></i></div><div class="metric-value">@score.ToString("0.0")</div><div class="metric-label">Điểm / 10</div></div></div>
+    <div class="col-md-4"><div class="metric-card"><div class="metric-icon"><i class="bi-check2-circle"></i></div><div class="metric-value">@(passed ? "Đạt" : "Chưa")</div><div class="metric-label">Kết quả</div></div></div>
+    <div class="col-md-4"><div class="metric-card"><div class="metric-icon"><i class="bi-shield-exclamation"></i></div><div class="metric-value">@Model.ViolationCount</div><div class="metric-label">Số vi phạm</div></div></div>
+</div>
+
+<div class="chart-card">
+    <h5 class="mb-3">Chi tiết câu trả lời</h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>STT</th><th>Câu hỏi</th><th>Đáp án chọn</th><th>Đáp án đúng</th><th>Kết quả</th></tr></thead>
+            <tbody>
+                @for (int i = 0; i < answers.Count; i++)
+                {
+                    var a = answers[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@a.Question?.Text</td>
+                        <td>@(string.IsNullOrWhiteSpace(a.SelectedAnswer) ? "Chưa chọn" : a.SelectedAnswer)</td>
+                        <td>@a.Question?.CorrectAnswer</td>
+                        <td>@if (a.IsCorrect) { <span class="badge bg-success">Đúng</span> } else { <span class="badge bg-danger">Sai</span> }</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

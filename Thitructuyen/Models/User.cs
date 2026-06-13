@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Thitructuyen.Models
 {
@@ -11,19 +11,18 @@ namespace Thitructuyen.Models
         public string Username { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty; // Lưu dạng đã băm PBKDF2
 
         public string FullName { get; set; } = string.Empty;
 
         public string Email { get; set; } = string.Empty;
 
-        public string Role { get; set; } = string.Empty; // Admin, Teacher, Student
+        public string Role { get; set; } = "Student"; // Admin, Teacher, Student
 
-        public string Status { get; set; } = "Active";
+        public string Status { get; set; } = "Active"; // Active, Locked
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Thêm trường AvatarUrl
         public string AvatarUrl { get; set; } = string.Empty;
 
         public string Phone { get; set; } = string.Empty;
@@ -31,5 +30,10 @@ namespace Thitructuyen.Models
         public string Address { get; set; } = string.Empty;
 
         public DateTime? Birthday { get; set; }
+
+        // R06: khóa tạm khi sai mật khẩu 5 lần
+        public int FailedLoginAttempts { get; set; } = 0;
+
+        public DateTime? LockoutEnd { get; set; }
     }
 }

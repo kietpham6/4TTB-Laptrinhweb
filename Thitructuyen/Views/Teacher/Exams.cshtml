@@ -1,397 +1,158 @@
-﻿@{
+@{
     ViewData["Title"] = "Quản lý kỳ thi";
 }
 
-<section class="services-section section-padding section-bg">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2>📝 Quản lý kỳ thi</h2>
-                        <p class="text-muted">Quản lý các kỳ thi trong hệ thống</p>
-                    </div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExamModal">
-                        <i class="bi-plus-lg me-2"></i>Tạo kỳ thi mới
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bộ lọc - ĐÃ SỬA LỖI -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" id="searchExam" placeholder="🔍 Tìm kiếm kỳ thi..." onkeyup="filterExams()">
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterExamStatus" onchange="filterExams()">
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="ongoing">Đang diễn ra</option>
-                            <option value="upcoming">Sắp diễn ra</option>
-                            <option value="ended">Đã kết thúc</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterExamSubject" onchange="filterExams()">
-                            <option value="all">Tất cả môn học</option>
-                            <option value="Lập trình Web">Lập trình Web</option>
-                            <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
-                            <option value="Tiếng Anh">Tiếng Anh</option>
-                            <option value="Toán cao cấp">Toán cao cấp</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">⟳ Reset</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bảng danh sách kỳ thi -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="examTable">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">ID</th>
-                                <th>Tên kỳ thi</th>
-                                <th>Môn học</th>
-                                <th>Thời gian</th>
-                                <th>Số câu</th>
-                                <th>Ngày bắt đầu</th>
-                                <th>Ngày kết thúc</th>
-                                <th>Số lượt thi</th>
-                                <th>Điểm TB</th>
-                                <th>Trạng thái</th>
-                                <th class="text-center pe-4">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="examTableBody">
-                            <tr>
-                                <td class="ps-4">1</td>
-                                <td>Kiểm tra giữa kỳ</td>
-                                <td>Lập trình Web</td>
-                                <td>60 phút</td>
-                                <td>50</td>
-                                <td>15/03/2026</td>
-                                <td>15/04/2026</td>
-                                <td>45</td>
-                                <td>7.8</td>
-                                <td><span class="badge bg-success">Đang diễn ra</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="viewExam(1)"><i class="bi-eye"></i></button>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editExam(1)"><i class="bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteExam(1, 'Kiểm tra giữa kỳ')"><i class="bi-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">2</td>
-                                <td>Ôn tập cuối kỳ</td>
-                                <td>Cơ sở dữ liệu</td>
-                                <td>90 phút</td>
-                                <td>80</td>
-                                <td>20/03/2026</td>
-                                <td>20/04/2026</td>
-                                <td>38</td>
-                                <td>6.5</td>
-                                <td><span class="badge bg-warning">Sắp diễn ra</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="viewExam(2)"><i class="bi-eye"></i></button>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editExam(2)"><i class="bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteExam(2, 'Ôn tập cuối kỳ')"><i class="bi-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">3</td>
-                                <td>Đánh giá năng lực</td>
-                                <td>Tiếng Anh B1</td>
-                                <td>45 phút</td>
-                                <td>40</td>
-                                <td>05/04/2026</td>
-                                <td>05/05/2026</td>
-                                <td>0</td>
-                                <td>-</td>
-                                <td><span class="badge bg-secondary">Sắp diễn ra</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="viewExam(3)"><i class="bi-eye"></i></button>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editExam(3)"><i class="bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteExam(3, 'Đánh giá năng lực')"><i class="bi-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">4</td>
-                                <td>Thi thử cuối kỳ</td>
-                                <td>Toán cao cấp</td>
-                                <td>120 phút</td>
-                                <td>100</td>
-                                <td>10/04/2026</td>
-                                <td>10/05/2026</td>
-                                <td>0</td>
-                                <td>-</td>
-                                <td><span class="badge bg-info">Chưa bắt đầu</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="viewExam(4)"><i class="bi-eye"></i></button>
-                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editExam(4)"><i class="bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteExam(4, 'Thi thử cuối kỳ')"><i class="bi-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card-footer bg-white border-0 pt-3 pb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted" id="resultCount">📊 Hiển thị 4 của 4 kỳ thi</span>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0" id="pagination">
-                            <li class="page-item disabled"><a class="page-link" href="#">«</a></li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">»</a></li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </div>
+<div class="pro-page-title">
+    <div>
+        <h2>📝 Quản lý kỳ thi</h2>
+        <p>Danh sách kỳ thi lấy trực tiếp từ database. Tạo đề thi dùng đúng giao diện Word/ngân hàng câu hỏi như trang giáo viên.</p>
     </div>
-</section>
+    <a class="btn btn-primary" asp-controller="Teacher" asp-action="CreateExam">
+        <i class="bi-plus-lg me-2"></i>Tạo kỳ thi mới
+    </a>
+</div>
 
-<!-- Modal Thêm kỳ thi -->
-<div class="modal fade" id="addExamModal" tabindex="-1">
-    <div class="modal-dialog modal-lg" style="margin-top:120px;">
-        <div class="modal-content rounded-4">
-            <div class="modal-header border-0 bg-primary text-white">
-                <h5 class="modal-title"><i class="bi-plus-circle-fill me-2"></i>Thêm kỳ thi mới</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="searchExam" placeholder="🔍 Tìm kiếm kỳ thi..." onkeyup="filterExams()">
             </div>
-            <div class="modal-body">
-                <form id="addExamForm">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên kỳ thi</label>
-                        <input type="text" id="examTitle" class="form-control" placeholder="VD: Kiểm tra giữa kỳ">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Mô tả</label>
-                        <textarea id="examDescription" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Môn học</label>
-                                <select id="examSubject" class="form-select">
-                                    <option>Lập trình Web</option>
-                                    <option>Cơ sở dữ liệu</option>
-                                    <option>Tiếng Anh</option>
-                                    <option>Toán cao cấp</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Thời gian làm bài</label>
-                                <select id="examDuration" class="form-select">
-                                    <option value="30">30 phút</option>
-                                    <option value="45">45 phút</option>
-                                    <option value="60" selected>60 phút</option>
-                                    <option value="90">90 phút</option>
-                                    <option value="120">120 phút</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Ngày bắt đầu</label>
-                                <input type="datetime-local" id="examStartTime" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Ngày kết thúc</label>
-                                <input type="datetime-local" id="examEndTime" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Số câu dễ</label>
-                                <input type="number" id="easyCount" class="form-control" value="10">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Số câu trung bình</label>
-                                <input type="number" id="mediumCount" class="form-control" value="15">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Số câu khó</label>
-                                <input type="number" id="hardCount" class="form-control" value="5">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-check mb-3">
-                                <input type="checkbox" class="form-check-input" id="randomQuestion" checked>
-                                <label class="form-check-label" for="randomQuestion">Trộn câu hỏi (mỗi học viên một đề)</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check mb-3">
-                                <input type="checkbox" class="form-check-input" id="randomOption">
-                                <label class="form-check-label" for="randomOption">Trộn đáp án</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Mật khẩu phòng thi (tùy chọn)</label>
-                        <input type="text" id="examPassword" class="form-control" placeholder="Để trống nếu không cần mật khẩu">
-                    </div>
-                </form>
+            <div class="col-md-3">
+                <select class="form-select" id="filterExamStatus" onchange="filterExams()">
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="ongoing">Đang diễn ra</option>
+                    <option value="upcoming">Sắp diễn ra</option>
+                    <option value="ended">Đã kết thúc</option>
+                </select>
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="addExam()">Tạo kỳ thi</button>
+            <div class="col-md-3">
+                <select class="form-select" id="filterExamSubject" onchange="filterExams()">
+                    <option value="all">Tất cả môn học</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">⟳ Reset</button>
             </div>
         </div>
     </div>
 </div>
 
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="examTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Tên kỳ thi</th>
+                        <th>Môn học</th>
+                        <th>Thời gian</th>
+                        <th>Số câu</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Số lượt thi</th>
+                        <th>Điểm TB</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="examTableBody">
+                    <tr><td colspan="11" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 pt-3 pb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted" id="resultCount">📊 Đang tải...</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
 <script>
-    // Dữ liệu mẫu - sau này thay bằng dữ liệu từ database
-    let examsData = [
-        { id: 1, name: "Kiểm tra giữa kỳ", subject: "Lập trình Web", duration: "60 phút", questions: 50, startDate: "15/03/2026", endDate: "15/04/2026", attempts: 45, avgScore: 7.8, status: "ongoing", statusText: "Đang diễn ra", statusClass: "bg-success" },
-        { id: 2, name: "Ôn tập cuối kỳ", subject: "Cơ sở dữ liệu", duration: "90 phút", questions: 80, startDate: "20/03/2026", endDate: "20/04/2026", attempts: 38, avgScore: 6.5, status: "upcoming", statusText: "Sắp diễn ra", statusClass: "bg-warning" },
-        { id: 3, name: "Đánh giá năng lực", subject: "Tiếng Anh B1", duration: "45 phút", questions: 40, startDate: "05/04/2026", endDate: "05/05/2026", attempts: 0, avgScore: "-", status: "upcoming", statusText: "Sắp diễn ra", statusClass: "bg-secondary" },
-        { id: 4, name: "Thi thử cuối kỳ", subject: "Toán cao cấp", duration: "120 phút", questions: 100, startDate: "10/04/2026", endDate: "10/05/2026", attempts: 0, avgScore: "-", status: "upcoming", statusText: "Chưa bắt đầu", statusClass: "bg-info" }
-    ];
+    let examsData = [];
+    const safe = v => `${v ?? ''}`.replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
 
-    function filterExams() {
-        var searchValue = document.getElementById('searchExam').value.toLowerCase();
-        var statusValue = document.getElementById('filterExamStatus').value;
-        var subjectValue = document.getElementById('filterExamSubject').value;
+    function statusClass(exam){ return exam.statusClass || (exam.status === 'ongoing' ? 'bg-success' : exam.status === 'ended' ? 'bg-secondary' : 'bg-warning'); }
 
-        var filteredExams = examsData.filter(function(exam) {
-            // Lọc theo tìm kiếm
-            var matchSearch = searchValue === "" || exam.name.toLowerCase().includes(searchValue);
-
-            // Lọc theo trạng thái
-            var matchStatus = statusValue === "all" || exam.status === statusValue;
-
-            // Lọc theo môn học
-            var matchSubject = subjectValue === "all" || exam.subject === subjectValue;
-
-            return matchSearch && matchStatus && matchSubject;
-        });
-
-        renderExamTable(filteredExams);
-
-        // Cập nhật số lượng kết quả
-        document.getElementById('resultCount').innerHTML = '📊 Hiển thị ' + filteredExams.length + ' của ' + examsData.length + ' kỳ thi';
+    async function loadExams(){
+        try {
+            const res = await fetch('/api/Api/exams');
+            if(!res.ok) throw new Error('Không tải được dữ liệu kỳ thi từ API');
+            examsData = await res.json();
+            buildSubjectFilter();
+            filterExams();
+        } catch(err) {
+            document.getElementById('examTableBody').innerHTML = `<tr><td colspan="11" class="text-center text-danger py-4">${safe(err.message)}</td></tr>`;
+            document.getElementById('resultCount').textContent = 'Không tải được dữ liệu';
+        }
     }
 
-    function renderExamTable(exams) {
-        var tbody = document.getElementById('examTableBody');
-        tbody.innerHTML = '';
+    function buildSubjectFilter(){
+        const select = document.getElementById('filterExamSubject');
+        const current = select.value;
+        const subjects = [...new Set(examsData.map(x => x.subject).filter(Boolean))].sort();
+        select.innerHTML = '<option value="all">Tất cả môn học</option>' + subjects.map(s => `<option value="${safe(s)}">${safe(s)}</option>`).join('');
+        select.value = subjects.includes(current) ? current : 'all';
+    }
 
-        if(exams.length === 0) {
+    function filterExams(){
+        const searchValue = document.getElementById('searchExam').value.toLowerCase().trim();
+        const statusValue = document.getElementById('filterExamStatus').value;
+        const subjectValue = document.getElementById('filterExamSubject').value;
+        const filtered = examsData.filter(exam => {
+            const name = (exam.name || exam.title || '').toLowerCase();
+            const matchSearch = !searchValue || name.includes(searchValue);
+            const matchStatus = statusValue === 'all' || exam.status === statusValue;
+            const matchSubject = subjectValue === 'all' || exam.subject === subjectValue;
+            return matchSearch && matchStatus && matchSubject;
+        });
+        renderExamTable(filtered);
+        document.getElementById('resultCount').innerHTML = `📊 Hiển thị ${filtered.length} của ${examsData.length} kỳ thi`;
+    }
+
+    function renderExamTable(exams){
+        const tbody = document.getElementById('examTableBody');
+        if(!exams.length){
             tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4">📭 Không tìm thấy kỳ thi nào!</td></tr>';
             return;
         }
-
-        for(var i = 0; i < exams.length; i++) {
-            var exam = exams[i];
-            var row = '<tr>' +
-                '<td class="ps-4">' + exam.id + '</td>' +
-                '<td>' + exam.name + '</td>' +
-                '<td>' + exam.subject + '</td>' +
-                '<td>' + exam.duration + '</td>' +
-                '<td>' + exam.questions + '</td>' +
-                '<td>' + exam.startDate + '</td>' +
-                '<td>' + exam.endDate + '</td>' +
-                '<td>' + exam.attempts + '</td>' +
-                '<td>' + exam.avgScore + '</td>' +
-                '<td><span class="badge ' + exam.statusClass + '">' + exam.statusText + '</span></td>' +
-                '<td class="text-center pe-4">' +
-                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="viewExam(' + exam.id + ')"><i class="bi-eye"></i></button>' +
-                    '<button class="btn btn-sm btn-outline-warning me-1" onclick="editExam(' + exam.id + ')"><i class="bi-pencil"></i></button>' +
-                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteExam(' + exam.id + ', \'' + exam.name + '\')"><i class="bi-trash"></i></button>' +
-                '</td>' +
-            '</tr>';
-            tbody.innerHTML += row;
-        }
+        tbody.innerHTML = exams.map(exam => `
+            <tr>
+                <td class="ps-4">${exam.id}</td>
+                <td><b>${safe(exam.name || exam.title)}</b></td>
+                <td>${safe(exam.subject || 'Chưa phân môn')}</td>
+                <td>${safe(exam.durationText || ((exam.duration || 0) + ' phút'))}</td>
+                <td>${exam.questions ?? exam.totalQuestions ?? 0}</td>
+                <td>${safe(exam.startDate || exam.startTime)}</td>
+                <td>${safe(exam.endDate || exam.endTime)}</td>
+                <td>${exam.attempts ?? 0}</td>
+                <td>${exam.avgScore ?? '-'}</td>
+                <td><span class="badge ${statusClass(exam)}">${safe(exam.statusText || exam.status)}</span></td>
+                <td class="text-center pe-4">
+                    <a class="btn btn-sm btn-outline-primary me-1" href="/Exam/TakeExam/${exam.id}" title="Xem/thi"><i class="bi-eye"></i></a>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteExam(${exam.id}, '${safe(exam.name || exam.title).replace(/'/g,'&#39;')}')"><i class="bi-trash"></i></button>
+                </td>
+            </tr>`).join('');
     }
 
-    function resetFilters() {
+    function resetFilters(){
         document.getElementById('searchExam').value = '';
         document.getElementById('filterExamStatus').value = 'all';
         document.getElementById('filterExamSubject').value = 'all';
         filterExams();
     }
 
-    function viewExam(id) {
-        alert('Xem chi tiết kỳ thi ID: ' + id);
+    async function deleteExam(id, name){
+        if(!confirm(`Bạn có chắc muốn xóa kỳ thi "${name}"?`)) return;
+        const res = await fetch(`/api/Api/exam/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        alert(data.message || (data.success ? 'Đã xóa kỳ thi' : 'Không thể xóa'));
+        if(data.success) loadExams();
     }
 
-    function editExam(id) {
-        alert('Chỉnh sửa kỳ thi ID: ' + id);
-    }
-
-    function deleteExam(id, name) {
-        if(confirm('Bạn có chắc muốn xóa kỳ thi "' + name + '"?')) {
-            alert('Đã xóa kỳ thi: ' + name);
-            // Xóa khỏi mảng dữ liệu
-            for(var i = 0; i < examsData.length; i++) {
-                if(examsData[i].id === id) {
-                    examsData.splice(i, 1);
-                    break;
-                }
-            }
-            filterExams(); // Cập nhật lại bảng
-        }
-    }
-
-    function addExam() {
-        var title = document.getElementById('examTitle').value;
-        if(!title) {
-            alert('Vui lòng nhập tên kỳ thi!');
-            return;
-        }
-
-        // Thêm kỳ thi mới vào mảng dữ liệu
-        var newId = examsData.length + 1;
-        var newExam = {
-            id: newId,
-            name: title,
-            subject: document.getElementById('examSubject').value,
-            duration: document.getElementById('examDuration').value + ' phút',
-            questions: parseInt(document.getElementById('easyCount').value) + parseInt(document.getElementById('mediumCount').value) + parseInt(document.getElementById('hardCount').value),
-            startDate: document.getElementById('examStartTime').value || 'Chưa cài',
-            endDate: document.getElementById('examEndTime').value || 'Chưa cài',
-            attempts: 0,
-            avgScore: '-',
-            status: 'upcoming',
-            statusText: 'Sắp diễn ra',
-            statusClass: 'bg-warning'
-        };
-
-        examsData.push(newExam);
-        alert('Đã tạo kỳ thi "' + title + '" thành công!');
-
-        $('#addExamModal').modal('hide');
-        document.getElementById('addExamForm').reset();
-        filterExams(); // Cập nhật lại bảng
-    }
-
-    // Khởi tạo bảng khi trang load
-    document.addEventListener('DOMContentLoaded', function() {
-        renderExamTable(examsData);
-        document.getElementById('resultCount').innerHTML = '📊 Hiển thị ' + examsData.length + ' của ' + examsData.length + ' kỳ thi';
-    });
+    document.addEventListener('DOMContentLoaded', loadExams);
 </script>
+}

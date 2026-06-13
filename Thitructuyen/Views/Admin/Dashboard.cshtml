@@ -1,180 +1,46 @@
-﻿@{
-    ViewData["Title"] = "Bảng điều khiển";
+@{
+    ViewData["Title"] = "Dashboard Admin";
 }
-
-<section class="intro-section section-padding">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2>📊 Bảng điều khiển hệ thống</h2>
-                <p class="text-muted">Tổng quan hoạt động của hệ thống thi trực tuyến</p>
-            </div>
-        </div>
-
-        <!-- Thống kê nhanh -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Tổng người dùng</h6>
-                                <h2 class="text-white mb-0">1,234</h2>
-                                <small class="text-white-50">↑ 12% so với tháng trước</small>
-                            </div>
-                            <i class="bi-people-fill fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Đề thi đang hoạt động</h6>
-                                <h2 class="text-white mb-0">24</h2>
-                                <small class="text-white-50">8 đang diễn ra</small>
-                            </div>
-                            <i class="bi-file-text-fill fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-warning text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Phiên thi đang diễn ra</h6>
-                                <h2 class="text-white mb-0">156</h2>
-                                <small class="text-white-50">48 thí sinh đang làm bài</small>
-                            </div>
-                            <i class="bi-clock-history fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Điểm trung bình</h6>
-                                <h2 class="text-white mb-0">7.8</h2>
-                                <small class="text-white-50">Tăng 0.5 điểm</small>
-                            </div>
-                            <i class="bi-graph-up fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Biểu đồ và thống kê chi tiết -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="mb-0">📈 Biểu đồ phổ điểm</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <canvas id="scoreChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="mb-0">🍩 Tỷ lệ đỗ/rớt</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <canvas id="passRateChart" height="250"></canvas>
-                        <div class="text-center mt-3">
-                            <span class="badge bg-success">Đỗ: 68%</span>
-                            <span class="badge bg-danger ms-2">Rớt: 32%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top thí sinh và bài thi gần đây -->
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="mb-0">🏆 Top 5 thí sinh xuất sắc</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="bg-light">
-                                    <tr><th>#</th><th>Họ tên</th><th>Số bài thi</th><th>Điểm TB</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>🥇</td><td>Nguyễn Văn A</td><td>12</td><td class="text-success fw-bold">9.5</td></tr>
-                                    <tr><td>🥈</td><td>Trần Thị B</td><td>10</td><td class="text-success fw-bold">8.9</td></tr>
-                                    <tr><td>🥉</td><td>Lê Văn C</td><td>8</td><td class="text-success fw-bold">8.5</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="mb-0">📝 Bài thi gần đây</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="bg-light">
-                                    <tr><th>Tên bài thi</th><th>Số thí sinh</th><th>Điểm TB</th><th>Trạng thái</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>Kiểm tra giữa kỳ</td><td>120</td><td>7.8</td><td><span class="badge bg-success">Đã kết thúc</span></td></tr>
-                                    <tr><td>Ôn tập cuối kỳ</td><td>95</td><td>6.5</td><td><span class="badge bg-warning">Đang diễn ra</span></td></tr>
-                                    <tr><td>Đánh giá năng lực</td><td>200</td><td>-</td><td><span class="badge bg-info">Sắp diễn ra</span></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="pro-page-title">
+    <div>
+        <h2>🛡️ Dashboard Admin</h2>
+        <p>Dữ liệu thật từ hệ thống: người dùng, đề thi, lượt thi, điểm số và cảnh báo gian lận.</p>
     </div>
-</section>
+    <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="ActivityLogs"><i class="bi-shield-check me-1"></i> Audit Log</a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-people"></i></div><div class="metric-value" data-k="totalUsers">@ViewBag.TotalUsers</div><div class="metric-label">Tổng người dùng</div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-file-earmark-text"></i></div><div class="metric-value" data-k="totalExams">@ViewBag.TotalExams</div><div class="metric-label">Tổng kỳ thi</div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-pencil-square"></i></div><div class="metric-value" data-k="totalAttempts">@ViewBag.TotalAttempts</div><div class="metric-label">Tổng lượt thi</div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-shield-exclamation"></i></div><div class="metric-value" data-k="violations">@ViewBag.Violations</div><div class="metric-label">Vi phạm Anti-cheat</div></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-8"><div class="chart-card"><h5 class="mb-3">📈 Lượt thi & điểm TB 7 ngày gần nhất</h5><canvas id="attemptChart" height="120"></canvas></div></div>
+    <div class="col-xl-4"><div class="chart-card"><h5 class="mb-3">👥 Cơ cấu vai trò</h5><canvas id="roleChart" height="170"></canvas></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-7"><div class="chart-card"><h5 class="mb-3">📚 Thống kê theo môn học</h5><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Môn học</th><th>Lượt thi</th><th>Điểm TB</th></tr></thead><tbody id="subjectStats"></tbody></table></div></div></div>
+    <div class="col-xl-5"><div class="chart-card"><h5 class="mb-3">🧾 Hoạt động mới nhất</h5><div id="latestLogs" class="vstack gap-2"></div></div></div>
+</div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Biểu đồ phổ điểm
-        new Chart(document.getElementById('scoreChart'), {
-            type: 'bar',
-            data: {
-                labels: ['0-2', '2-4', '4-6', '6-8', '8-10'],
-                datasets: [{
-                    label: 'Số lượng thí sinh',
-                    data: [5, 12, 45, 89, 67],
-                    backgroundColor: '#667eea',
-                    borderRadius: 8
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: true }
-        });
-
-        // Biểu đồ tỷ lệ đỗ/rớt
-        new Chart(document.getElementById('passRateChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Đỗ (≥5)', 'Rớt (<5)'],
-                datasets: [{
-                    data: [68, 32],
-                    backgroundColor: ['#28a745', '#dc3545']
-                }]
-            }
-        });
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let attemptChart, roleChart;
+fetch('/api/dashboard/admin').then(r=>{ if(!r.ok) throw new Error('Không tải được API dashboard'); return r.json(); }).then(data=>{
+    document.querySelectorAll('[data-k]').forEach(el=> el.textContent = data[el.dataset.k] ?? 0);
+    if(window.Chart){
+        attemptChart = new Chart(document.getElementById('attemptChart'), {type:'bar', data:{labels:(data.chart||[]).map(x=>x.label), datasets:[{label:'Lượt thi', data:(data.chart||[]).map(x=>x.attempts)}, {label:'Điểm TB', type:'line', data:(data.chart||[]).map(x=>x.avgScore), yAxisID:'y1'}]}, options:{responsive:true, scales:{y:{beginAtZero:true}, y1:{position:'right', min:0, max:10, grid:{drawOnChartArea:false}}}}});
+        roleChart = new Chart(document.getElementById('roleChart'), {type:'doughnut', data:{labels:(data.roleStats||[]).map(x=>x.role), datasets:[{data:(data.roleStats||[]).map(x=>x.count)}]}, options:{responsive:true}});
+    }
+    document.getElementById('subjectStats').innerHTML = (data.subjectStats||[]).map(x=>`<tr><td>${x.subject}</td><td><span class="badge bg-info">${x.attempts}</span></td><td><b>${x.avgScore}</b>/10</td></tr>`).join('') || '<tr><td colspan="3" class="text-center text-muted py-4">Chưa có dữ liệu</td></tr>';
+    document.getElementById('latestLogs').innerHTML = (data.latestLogs||[]).map(x=>`<div class="border rounded-3 p-2"><b>${x.action}</b><br><span class="text-muted small">${x.detail}</span><br><small>${x.createdAt} • ${x.ipAddress||''}</small></div>`).join('') || '<div class="text-muted">Chưa có log</div>';
+}).catch(err=>{
+    document.getElementById('subjectStats').innerHTML = `<tr><td colspan="3" class="text-danger text-center py-4">${err.message}</td></tr>`;
+    document.getElementById('latestLogs').innerHTML = '<div class="text-danger">Không tải được dữ liệu API. Kiểm tra database/migration.</div>';
+});
+</script>
 }

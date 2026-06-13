@@ -1,51 +1,465 @@
-﻿@{
+@using Thitructuyen.Models
+@{
     ViewData["Title"] = "Tạo đề thi";
+    var subjects = ViewBag.Subjects as List<Subject> ?? new List<Subject>();
+    var now = DateTime.Now;
+    var startDefault = now.ToString("yyyy-MM-ddTHH:mm");
+    var endDefault = now.AddDays(7).ToString("yyyy-MM-ddTHH:mm");
 }
 
-<section class="intro-section section-padding" style="margin-top:120px;">
+<section class="exam-builder-section section-padding pro-page-section">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-5">
-                        <h2 class="mb-4">📝 Tạo đề thi mới</h2>
+        @Html.AntiForgeryToken()
 
-                        <form>
-                            <div class="mb-3"><label class="form-label">Tên đề thi</label><input type="text" class="form-control" placeholder="VD: Kiểm tra giữa kỳ"></div>
-                            <div class="mb-3"><label class="form-label">Mô tả</label><textarea class="form-control" rows="3"></textarea></div>
+        <div class="row align-items-center g-4 mb-4">
+            <div class="col-lg-8">
+                <span class="pro-eyebrow"><i class="bi bi-stars me-1"></i> Exam Builder</span>
+                <h1 class="display-6 fw-bold mb-2">Tạo đề thi chuyên nghiệp</h1>
+                <p class="text-muted mb-0">
+                    Hỗ trợ 2 cách tạo đề: tự động lấy câu hỏi từ ngân hàng hoặc tải file Word để hệ thống đọc câu hỏi,
+                    hiển thị bản kiểm tra trước khi lưu chính thức.
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <div class="pro-hero-note">
+                    <div class="note-icon"><i class="bi bi-file-earmark-word"></i></div>
+                    <div>
+                        <div class="fw-bold text-dark">Quy trình an toàn</div>
+                        <small>Upload Word → Kiểm tra preview → Xác nhận tạo đề</small>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                            <div class="row">
-                                <div class="col-md-6"><div class="mb-3"><label class="form-label">Môn học</label><select class="form-select"><option>Lập trình Web</option><option>Cơ sở dữ liệu</option></select></div></div>
-                                <div class="col-md-6"><div class="mb-3"><label class="form-label">Thời gian làm bài</label><select class="form-select"><option>30 phút</option><option>45 phút</option><option>60 phút</option><option>90 phút</option></select></div></div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 sticky-lg-top pro-sticky-card">
+                    <div class="card-body p-4">
+                        <h5 class="mb-3"><i class="bi bi-list-check text-primary me-2"></i>Thông tin đề thi</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên đề thi <span class="text-danger">*</span></label>
+                            <input id="title" type="text" class="form-control" placeholder="VD: Kiểm tra giữa kỳ Lập trình Web">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea id="description" class="form-control" rows="3" placeholder="Ghi chú ngắn về phạm vi đề thi"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Môn học <span class="text-danger">*</span></label>
+                            <select id="subjectId" class="form-select">
+                                <option value="">-- Chọn môn học --</option>
+                                @foreach (var subject in subjects)
+                                {
+                                    <option value="@subject.Id">@subject.SubjectName (@subject.SubjectCode)</option>
+                                }
+                            </select>
+                            @if (!subjects.Any())
+                            {
+                                <small class="text-danger d-block mt-2">Chưa có môn học. Vào Admin → Quản lý môn học để thêm trước.</small>
+                            }
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">Thời gian</label>
+                                <select id="duration" class="form-select">
+                                    <option value="15">15 phút</option>
+                                    <option value="30">30 phút</option>
+                                    <option value="45" selected>45 phút</option>
+                                    <option value="60">60 phút</option>
+                                    <option value="90">90 phút</option>
+                                    <option value="120">120 phút</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Mật khẩu</label>
+                                <input id="examPassword" type="text" class="form-control" placeholder="Để trống nếu không cần mật khẩu" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Ngày bắt đầu</label>
+                            <input id="startTime" type="datetime-local" class="form-control" value="@startDefault">
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">Ngày kết thúc</label>
+                            <input id="endTime" type="datetime-local" class="form-control" value="@endDefault">
+                        </div>
+
+                        <div class="alert alert-info border-0 mt-4 mb-0 small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            File Word nên dùng mẫu: <b>Câu 1</b>, <b>A.</b>, <b>B.</b>, <b>C.</b>, <b>D.</b>, <b>Đáp án: A</b>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4 p-lg-5">
+                        <ul class="nav nav-pills pro-tabs mb-4" id="createModeTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#wordMode" type="button" role="tab">
+                                    <i class="bi bi-file-earmark-word me-1"></i> Tạo bằng file Word
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#bankMode" type="button" role="tab">
+                                    <i class="bi bi-shuffle me-1"></i> Lấy từ ngân hàng câu hỏi
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="wordMode" role="tabpanel">
+                                <div class="upload-zone" id="uploadZone">
+                                    <input id="wordFile" type="file" accept=".docx" hidden>
+                                    <div class="upload-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                                    <h5 class="mb-2">Tải file Word đề thi</h5>
+                                    <p class="text-muted mb-3">Kéo thả file .docx vào đây hoặc bấm để chọn file.</p>
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('wordFile').click()">
+                                        <i class="bi bi-folder2-open me-1"></i> Chọn file Word
+                                    </button>
+                                    <div id="fileName" class="small text-muted mt-3"></div>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-4">
+                                    <div class="small text-muted">
+                                        <i class="bi bi-shield-check me-1"></i>
+                                        Hệ thống chỉ lưu đề sau khi mày xem lại preview và bấm xác nhận.
+                                    </div>
+                                    <button type="button" id="btnPreviewWord" class="btn btn-primary">
+                                        <i class="bi bi-eye me-1"></i> Đọc file và kiểm tra
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6"><div class="mb-3"><label class="form-label">Ngày bắt đầu</label><input type="datetime-local" class="form-control"></div></div>
-                                <div class="col-md-6"><div class="mb-3"><label class="form-label">Ngày kết thúc</label><input type="datetime-local" class="form-control"></div></div>
-                            </div>
+                            <div class="tab-pane fade" id="bankMode" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Số câu dễ</label>
+                                        <input id="easyCount" type="number" class="form-control" value="10" min="0">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Số câu trung bình</label>
+                                        <input id="mediumCount" type="number" class="form-control" value="15" min="0">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Số câu khó</label>
+                                        <input id="hardCount" type="number" class="form-control" value="5" min="0">
+                                    </div>
+                                </div>
 
-                            <h5 class="mt-3 mb-3">📊 Cấu hình đề thi</h5>
-                            <div class="row">
-                                <div class="col-md-4"><div class="mb-3"><label class="form-label">Số câu dễ</label><input type="number" class="form-control" value="10" min="0"></div></div>
-                                <div class="col-md-4"><div class="mb-3"><label class="form-label">Số câu trung bình</label><input type="number" class="form-control" value="15" min="0"></div></div>
-                                <div class="col-md-4"><div class="mb-3"><label class="form-label">Số câu khó</label><input type="number" class="form-control" value="5" min="0"></div></div>
-                            </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check pro-check">
+                                            <input type="checkbox" class="form-check-input" id="randomQ" checked>
+                                            <label class="form-check-label" for="randomQ">Trộn câu hỏi</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check pro-check">
+                                            <input type="checkbox" class="form-check-input" id="randomA" checked>
+                                            <label class="form-check-label" for="randomA">Trộn đáp án</label>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div class="row">
-                                <div class="col-md-6"><div class="mb-3 form-check"><input type="checkbox" class="form-check-input" id="randomQ"><label class="form-check-label" for="randomQ">Trộn câu hỏi (mỗi học viên một đề)</label></div></div>
-                                <div class="col-md-6"><div class="mb-3 form-check"><input type="checkbox" class="form-check-input" id="randomA"><label class="form-check-label" for="randomA">Trộn đáp án</label></div></div>
-                            </div>
+                                <div class="alert alert-warning border-0 mt-4 mb-0 small">
+                                    <i class="bi bi-lightbulb me-1"></i>
+                                    Cách này sẽ tạo đề bằng cách rút câu hỏi ngẫu nhiên từ ngân hàng câu hỏi theo độ khó.
+                                </div>
 
-                            <div class="mb-3"><label class="form-label">Mật khẩu phòng thi (tùy chọn)</label><input type="text" class="form-control" placeholder="Để trống nếu không cần mật khẩu"></div>
-
-                            <div class="d-flex justify-content-end gap-2 mt-4">
-                                <a href="/Teacher/Exams" class="btn btn-secondary">Hủy</a>
-                                <button type="submit" class="btn btn-primary">Tạo đề thi</button>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="/Teacher/Exams" class="btn btn-light">Hủy</a>
+                                    <button type="button" id="btnCreateFromBank" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle me-1"></i> Tạo đề từ ngân hàng
+                                    </button>
+                                </div>
                             </div>
-                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="previewPanel" class="card border-0 shadow-sm rounded-4 d-none">
+                    <div class="card-header bg-white p-4 border-0">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h5 class="mb-1"><i class="bi bi-clipboard-check text-primary me-2"></i>Kiểm tra câu hỏi từ file Word</h5>
+                                <small id="previewSummary" class="text-muted">Chưa có dữ liệu.</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="btnClearPreview" class="btn btn-light btn-sm">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Làm lại
+                                </button>
+                                <button type="button" id="btnCreateFromWord" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check2-circle me-1"></i> Xác nhận tạo đề
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive preview-table-wrap">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:70px;">STT</th>
+                                        <th>Nội dung câu hỏi</th>
+                                        <th style="width:130px;">Loại</th>
+                                        <th style="width:110px;">Độ khó</th>
+                                        <th style="width:90px;">Đáp án</th>
+                                        <th style="width:100px;">Điểm</th>
+                                        <th style="width:130px;">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="previewBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="liveToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div id="toastBody" class="toast-body">Thông báo</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let parsedQuestions = [];
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    const wordFile = document.getElementById('wordFile');
+    const uploadZone = document.getElementById('uploadZone');
+    const fileName = document.getElementById('fileName');
+
+    function showToast(message, type = 'primary') {
+        const toastEl = document.getElementById('liveToast');
+        const body = document.getElementById('toastBody');
+        toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+        body.textContent = message;
+        bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3500 }).show();
+    }
+
+    function getExamMeta() {
+        return {
+            title: document.getElementById('title').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            subjectId: document.getElementById('subjectId').value,
+            duration: document.getElementById('duration').value,
+            examPassword: document.getElementById('examPassword').value.trim(),
+            startTime: document.getElementById('startTime').value,
+            endTime: document.getElementById('endTime').value
+        };
+    }
+
+    function validateMeta() {
+        const meta = getExamMeta();
+        if (!meta.title) return 'Vui lòng nhập tên đề thi.';
+        if (!meta.subjectId) return 'Vui lòng chọn môn học.';
+        if (!meta.duration || Number(meta.duration) < 5) return 'Thời gian làm bài không hợp lệ.';
+        if (!meta.startTime || !meta.endTime) return 'Vui lòng chọn ngày bắt đầu và ngày kết thúc.';
+        if (new Date(meta.startTime) >= new Date(meta.endTime)) return 'Ngày bắt đầu phải trước ngày kết thúc.';
+        return '';
+    }
+
+    function setLoading(button, isLoading, text) {
+        if (isLoading) {
+            button.dataset.oldHtml = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${text}`;
+        } else {
+            button.disabled = false;
+            button.innerHTML = button.dataset.oldHtml || button.innerHTML;
+        }
+    }
+
+    wordFile.addEventListener('change', () => {
+        fileName.textContent = wordFile.files[0] ? `Đã chọn: ${wordFile.files[0].name}` : '';
+    });
+
+    ['dragenter', 'dragover'].forEach(evt => uploadZone.addEventListener(evt, e => {
+        e.preventDefault();
+        uploadZone.classList.add('is-dragover');
+    }));
+
+    ['dragleave', 'drop'].forEach(evt => uploadZone.addEventListener(evt, e => {
+        e.preventDefault();
+        uploadZone.classList.remove('is-dragover');
+    }));
+
+    uploadZone.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        wordFile.files = dt.files;
+        fileName.textContent = `Đã chọn: ${file.name}`;
+    });
+
+    uploadZone.addEventListener('click', e => {
+        if (e.target.tagName !== 'BUTTON') wordFile.click();
+    });
+
+    document.getElementById('btnPreviewWord').addEventListener('click', async () => {
+        const button = document.getElementById('btnPreviewWord');
+        const metaError = validateMeta();
+        if (metaError) return showToast(metaError, 'warning');
+        if (!wordFile.files[0]) return showToast('Vui lòng chọn file Word .docx.', 'warning');
+
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', token);
+        formData.append('wordFile', wordFile.files[0]);
+
+        try {
+            setLoading(button, true, 'Đang đọc file...');
+            const res = await fetch('/Teacher/PreviewWordExam', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!data.success) return showToast(data.message || 'Không thể đọc file Word.', 'danger');
+
+            parsedQuestions = data.questions || [];
+            renderPreview(parsedQuestions);
+            showToast(data.message, parsedQuestions.some(q => !q.isValid) ? 'warning' : 'success');
+        } catch (err) {
+            showToast('Lỗi kết nối khi đọc file Word.', 'danger');
+        } finally {
+            setLoading(button, false);
+        }
+    });
+
+    document.getElementById('btnCreateFromWord').addEventListener('click', async () => {
+        const button = document.getElementById('btnCreateFromWord');
+        const metaError = validateMeta();
+        if (metaError) return showToast(metaError, 'warning');
+        if (!parsedQuestions.length) return showToast('Chưa có câu hỏi để tạo đề.', 'warning');
+        if (parsedQuestions.some(q => !q.isValid)) return showToast('Còn câu hỏi lỗi, vui lòng sửa file Word rồi tải lại.', 'warning');
+
+        const meta = getExamMeta();
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', token);
+        formData.append('title', meta.title);
+        formData.append('description', meta.description);
+        formData.append('subjectId', meta.subjectId);
+        formData.append('duration', meta.duration);
+        formData.append('examPassword', meta.examPassword);
+        formData.append('startTime', meta.startTime);
+        formData.append('endTime', meta.endTime);
+        formData.append('questionsJson', JSON.stringify(parsedQuestions));
+
+        try {
+            setLoading(button, true, 'Đang tạo đề...');
+            const res = await fetch('/Teacher/CreateExamFromWord', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!data.success) return showToast(data.message || 'Tạo đề thất bại.', 'danger');
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.href = '/Teacher/Exams', 900);
+        } catch (err) {
+            showToast('Lỗi kết nối khi tạo đề.', 'danger');
+        } finally {
+            setLoading(button, false);
+        }
+    });
+
+    document.getElementById('btnCreateFromBank').addEventListener('click', async () => {
+        const button = document.getElementById('btnCreateFromBank');
+        const metaError = validateMeta();
+        if (metaError) return showToast(metaError, 'warning');
+
+        const meta = getExamMeta();
+        const formData = new FormData();
+        formData.append('title', meta.title);
+        formData.append('description', meta.description);
+        formData.append('subjectId', meta.subjectId);
+        formData.append('duration', meta.duration);
+        formData.append('examPassword', meta.examPassword);
+        formData.append('startTime', meta.startTime);
+        formData.append('endTime', meta.endTime);
+        formData.append('easyCount', document.getElementById('easyCount').value || 0);
+        formData.append('mediumCount', document.getElementById('mediumCount').value || 0);
+        formData.append('hardCount', document.getElementById('hardCount').value || 0);
+
+        try {
+            setLoading(button, true, 'Đang tạo đề...');
+            const res = await fetch('/Teacher/CreateExam', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!data.success) return showToast(data.message || 'Tạo đề thất bại.', 'danger');
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.href = '/Teacher/Exams', 900);
+        } catch (err) {
+            showToast('Lỗi kết nối khi tạo đề.', 'danger');
+        } finally {
+            setLoading(button, false);
+        }
+    });
+
+    document.getElementById('btnClearPreview').addEventListener('click', () => {
+        parsedQuestions = [];
+        wordFile.value = '';
+        fileName.textContent = '';
+        document.getElementById('previewPanel').classList.add('d-none');
+        document.getElementById('previewBody').innerHTML = '';
+        showToast('Đã xóa bản preview.', 'primary');
+    });
+
+    function renderPreview(questions) {
+        const panel = document.getElementById('previewPanel');
+        const body = document.getElementById('previewBody');
+        const summary = document.getElementById('previewSummary');
+        const valid = questions.filter(q => q.isValid).length;
+        const invalid = questions.length - valid;
+
+        summary.textContent = `${questions.length} câu hỏi • ${valid} hợp lệ • ${invalid} cần kiểm tra`;
+        body.innerHTML = questions.map((q, index) => `
+            <tr class="${q.isValid ? '' : 'table-warning'}">
+                <td><span class="badge rounded-pill bg-primary">${index + 1}</span></td>
+                <td>
+                    <div class="fw-semibold text-dark mb-1">${escapeHtml(q.text || '')}</div>
+                    ${renderOptions(q)}
+                    ${q.error ? `<div class="text-danger small mt-2"><i class="bi bi-exclamation-triangle me-1"></i>${escapeHtml(q.error)}</div>` : ''}
+                </td>
+                <td><span class="badge bg-light text-dark border">${escapeHtml(q.questionType || '')}</span></td>
+                <td><span class="badge ${difficultyClass(q.difficulty)}">${escapeHtml(q.difficulty || '')}</span></td>
+                <td><b>${escapeHtml(q.correctAnswer || '')}</b></td>
+                <td>${q.points || 1}</td>
+                <td>${q.isValid ? '<span class="badge bg-success">Hợp lệ</span>' : '<span class="badge bg-warning text-dark">Cần sửa</span>'}</td>
+            </tr>
+        `).join('');
+
+        panel.classList.remove('d-none');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderOptions(q) {
+        const opts = [
+            ['A', q.optionA], ['B', q.optionB], ['C', q.optionC], ['D', q.optionD]
+        ].filter(x => x[1]);
+        if (!opts.length) return '';
+        return `<div class="preview-options">${opts.map(x => `<span><b>${x[0]}.</b> ${escapeHtml(x[1])}</span>`).join('')}</div>`;
+    }
+
+    function difficultyClass(value) {
+        if (value === 'Dễ') return 'bg-success';
+        if (value === 'Khó') return 'bg-danger';
+        return 'bg-info';
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+</script>
+}

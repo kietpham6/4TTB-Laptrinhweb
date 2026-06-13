@@ -1,121 +1,130 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Thitructuyen.Data;
+using Thitructuyen.Helpers;
+using Thitructuyen.Models;
 
 namespace Thitructuyen.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        // Dashboard - Tổng quan hệ thống
+        private readonly ApplicationDbContext _context;
+        public AdminController(ApplicationDbContext context) => _context = context;
+
         public IActionResult Dashboard()
         {
             ViewData["Title"] = "Bảng điều khiển";
+            ViewBag.TotalUsers = _context.Users.Count();
+            ViewBag.TotalExams = _context.Exams.Count();
+            ViewBag.TotalAttempts = _context.ExamAttempts.Count();
+            ViewBag.Violations = _context.ExamAttempts.Sum(a => (int?)a.ViolationCount) ?? 0;
             return View();
         }
-
-        // Quản lý người dùng
-        public IActionResult Users()
-        {
-            ViewData["Title"] = "Quản lý người dùng";
-            return View();
-        }
+        public IActionResult Users() { ViewData["Title"] = "Quản lý người dùng"; return View(); }
 
         [HttpPost]
         public IActionResult CreateUser(string username, string password, string fullname, string email, string role)
         {
-            // Logic thêm user
+            if (string.IsNullOrEmpty(password) || password.Length < 6)
+                return Json(new { success = false, message = "Mật khẩu tối thiểu 6 ký tự!" });
+            if (_context.Users.Any(u => u.Username == username))
+                return Json(new { success = false, message = "Tên đăng nhập đã tồn tại!" });
+
+            _context.Users.Add(new User
+            {
+                Username = username,
+                Password = PasswordHasher.Hash(password),
+                FullName = fullname ?? "",
+                Email = email ?? "",
+                Role = role ?? "Student",
+                Status = "Active",
+                AvatarUrl = "/Temp/images/avatar/default-avatar.png"
+            });
+            _context.SaveChanges();
             return Json(new { success = true });
         }
 
         [HttpPost]
         public IActionResult EditUser(int id, string fullname, string email, string role, string status)
         {
-            // Logic sửa user
+            var u = _context.Users.Find(id);
+            if (u == null) return Json(new { success = false, message = "Không tìm thấy!" });
+            u.FullName = fullname ?? u.FullName;
+            u.Email = email ?? u.Email;
+            u.Role = role ?? u.Role;
+            u.Status = status ?? u.Status;
+            _context.SaveChanges();
             return Json(new { success = true });
         }
 
         [HttpPost]
         public IActionResult DeleteUser(int id)
         {
-            // Logic xóa user
+            var u = _context.Users.Find(id);
+            if (u != null && u.Role != "Admin") { _context.Users.Remove(u); _context.SaveChanges(); }
             return Json(new { success = true });
         }
 
         [HttpPost]
         public IActionResult LockUser(int id)
         {
-            // Logic khóa user
+            var u = _context.Users.Find(id);
+            if (u != null)
+            {
+                u.Status = u.Status == "Active" ? "Locked" : "Active";
+                if (u.Status == "Active") { u.LockoutEnd = null; u.FailedLoginAttempts = 0; }
+                _context.SaveChanges();
+            }
             return Json(new { success = true });
         }
 
-        // Quản lý môn học
-        public IActionResult Subjects()
-        {
-            ViewData["Title"] = "Quản lý môn học";
-            return View();
-        }
+        // ===== Môn học (R07-R09) =====
+        public IActionResult Subjects() { ViewData["Title"] = "Quản lý môn học"; return View(); }
 
         [HttpPost]
         public IActionResult CreateSubject(string subjectCode, string subjectName, string description, int credits, string department)
         {
-            // Logic thêm môn học
+            if (_context.Subjects.Any(s => s.SubjectCode == subjectCode)) // R07
+                return Json(new { success = false, message = "Mã môn học đã tồn tại!" });
+
+            _context.Subjects.Add(new Subject
+            {
+                SubjectCode = subjectCode,
+                SubjectName = subjectName,
+                Description = description ?? "",
+                Credits = credits,
+                Department = department ?? "",
+                IsActive = true
+            });
+            _context.SaveChanges();
             return Json(new { success = true });
         }
 
-        // Quản lý chương học
-        public IActionResult Chapters(int subjectId)
+        public IActionResult Chapters(int subjectId) { ViewData["Title"] = "Quản lý chương học"; return View(); }
+
+        [HttpPost]
+        public IActionResult CreateChapter(int subjectId, string chapterName, int order)
         {
-            ViewData["Title"] = "Quản lý chương học";
-            return View();
+            _context.Chapters.Add(new Chapter { SubjectId = subjectId, ChapterName = chapterName, Order = order });
+            _context.SaveChanges();
+            return Json(new { success = true });
         }
 
-        // Quản lý kỳ thi
-        public IActionResult Exams()
-        {
-            ViewData["Title"] = "Quản lý kỳ thi";
-            return View();
-        }
-
-        // Ngân hàng câu hỏi
-        public IActionResult QuestionBank()
-        {
-            ViewData["Title"] = "Ngân hàng câu hỏi";
-            return View();
-        }
+        public IActionResult Exams() { ViewData["Title"] = "Quản lý kỳ thi"; return View(); }
+        public IActionResult CreateExam() => RedirectToAction("CreateExam", "Teacher");
+        public IActionResult QuestionBank() { ViewData["Title"] = "Ngân hàng câu hỏi"; return View(); }
 
         [HttpPost]
         public IActionResult ImportQuestions(IFormFile file)
         {
-            // Import Excel
-            return Json(new { success = true });
+            return Json(new { success = false, message = "Hệ thống chỉ hỗ trợ tạo đề từ file Word .docx tại chức năng Tạo kỳ thi mới." });
         }
 
-        // Cấu hình hệ thống
-        public IActionResult Settings()
-        {
-            ViewData["Title"] = "Cấu hình hệ thống";
-            return View();
-        }
-
-        // Thống kê báo cáo
-        public IActionResult Statistics()
-        {
-            ViewData["Title"] = "Thống kê báo cáo";
-            return View();
-        }
-
-        // Giám sát thi trực tuyến
-        public IActionResult Proctoring()
-        {
-            ViewData["Title"] = "Giám sát thi";
-            return View();
-        }
-
-        // Nhật ký hoạt động
-        public IActionResult ActivityLogs()
-        {
-            ViewData["Title"] = "Nhật ký hoạt động";
-            return View();
-        }
+        public IActionResult Settings() { ViewData["Title"] = "Cấu hình hệ thống"; return View(); }
+        public IActionResult Statistics() { ViewData["Title"] = "Thống kê báo cáo"; return View(); }
+        public IActionResult Leaderboard() { ViewData["Title"] = "Bảng xếp hạng"; return View(); }
+        public IActionResult Proctoring() { ViewData["Title"] = "Giám sát thi"; return View(); }
+        public IActionResult ActivityLogs() { ViewData["Title"] = "Nhật ký hoạt động"; return View(); }
     }
 }

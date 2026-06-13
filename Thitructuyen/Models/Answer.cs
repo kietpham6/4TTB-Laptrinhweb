@@ -1,4 +1,4 @@
-﻿namespace Thitructuyen.Models
+namespace Thitructuyen.Models
 {
     public class Answer
     {
@@ -7,8 +7,8 @@
         public int QuestionId { get; set; }
         public string? SelectedAnswer { get; set; }
         public bool IsCorrect { get; set; }
-        public int? EssayScore { get; set; } // Điểm tự luận
-        public string? TeacherComment { get; set; } // Nhận xét của giáo viên
+        public double? EssayScore { get; set; }       // R33: điểm tự luận giáo viên chấm
+        public string? TeacherComment { get; set; }   // Nhận xét
 
         public virtual ExamAttempt? ExamAttempt { get; set; }
         public virtual Question? Question { get; set; }

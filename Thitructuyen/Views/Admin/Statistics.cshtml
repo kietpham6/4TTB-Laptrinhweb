@@ -1,195 +1,24 @@
-﻿@{
-    ViewData["Title"] = "Thống kê báo cáo";
-}
-
-<section class="intro-section section-padding" style="margin-top:50px;>
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2>📊 Thống kê báo cáo</h2>
-                <p class="text-muted">Tổng hợp dữ liệu về người dùng, bài thi và kết quả</p>
-            </div>
-        </div>
-
-        <!-- Thống kê nhanh -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Tổng người dùng</h6>
-                                <h2 class="text-white mb-0">1,234</h2>
-                                <small class="text-white-50">↑ 12%</small>
-                            </div>
-                            <i class="bi-people-fill fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Tổng bài thi</h6>
-                                <h2 class="text-white mb-0">156</h2>
-                                <small class="text-white-50">↑ 8%</small>
-                            </div>
-                            <i class="bi-file-text-fill fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-warning text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Lượt thi</h6>
-                                <h2 class="text-white mb-0">3,456</h2>
-                                <small class="text-white-50">↑ 15%</small>
-                            </div>
-                            <i class="bi-clock-history fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 mb-1">Điểm TB</h6>
-                                <h2 class="text-white mb-0">7.8</h2>
-                                <small class="text-white-50">↑ 0.5</small>
-                            </div>
-                            <i class="bi-graph-up fs-1 text-white-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Biểu đồ -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="mb-0">📈 Biểu đồ phổ điểm</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <canvas id="scoreChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="mb-0">🍩 Tỷ lệ đỗ/rớt</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <canvas id="passRateChart" height="200"></canvas>
-                        <div class="text-center mt-3">
-                            <span class="badge bg-success me-2">Đỗ: 68%</span>
-                            <span class="badge bg-danger">Rớt: 32%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top thí sinh -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white border-0 pt-4 px-4">
-                <h5 class="mb-0">🏆 Top 10 thí sinh xuất sắc nhất</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr><th>#</th><th>Họ tên</th><th>Số bài thi</th><th>Điểm TB</th><th>Cao nhất</th><th>Thấp nhất</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td class="fw-bold text-warning">🥇</td><td>Nguyễn Văn A</td><td>12</td><td class="text-success fw-bold">9.5</td><td>10</td><td>8.5</td></tr>
-                            <tr><td class="fw-bold text-secondary">🥈</td><td>Trần Thị B</td><td>10</td><td class="text-success fw-bold">8.9</td><td>9.5</td><td>8.0</td></tr>
-                            <tr><td class="fw-bold text-danger">🥉</td><td>Lê Văn C</td><td>8</td><td class="text-success fw-bold">8.5</td><td>9.0</td><td>7.5</td></tr>
-                            <tr><td>4</td><td>Phạm Thị D</td><td>15</td><td class="text-success fw-bold">8.2</td><td>9.0</td><td>7.0</td></tr>
-                            <tr><td>5</td><td>Hoàng Văn E</td><td>6</td><td class="text-warning fw-bold">7.8</td><td>8.5</td><td>7.0</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top môn học -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 px-4">
-                <h5 class="mb-0">📚 Thống kê theo môn học</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr><th>Môn học</th><th>Số đề thi</th><th>Số lượt thi</th><th>Điểm TB</th><th>Tỷ lệ đỗ</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Lập trình Web</td><td>25</td><td>1,234</td><td>8.2</td><td class="text-success">78%</td></tr>
-                            <tr><td>Cơ sở dữ liệu</td><td>18</td><td>987</td><td>7.5</td><td class="text-warning">65%</td></tr>
-                            <tr><td>Tiếng Anh</td><td>12</td><td>654</td><td>7.8</td><td class="text-success">70%</td></tr>
-                            <tr><td>Toán cao cấp</td><td>20</td><td>876</td><td>6.8</td><td class="text-danger">55%</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col-12 text-end">
-                <button class="btn btn-outline-success me-2" onclick="exportExcel()">
-                    <i class="bi-file-excel me-1"></i>Xuất Excel
-                </button>
-                <button class="btn btn-outline-danger" onclick="exportPDF()">
-                    <i class="bi-file-pdf me-1"></i>Xuất PDF
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Biểu đồ phổ điểm
-        new Chart(document.getElementById('scoreChart'), {
-            type: 'bar',
-            data: {
-                labels: ['0-2', '2-4', '4-6', '6-8', '8-10'],
-                datasets: [{
-                    label: 'Số lượng thí sinh',
-                    data: [15, 45, 120, 89, 234],
-                    backgroundColor: '#667eea',
-                    borderRadius: 8
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
-        });
-
-        // Biểu đồ tỷ lệ đỗ/rớt
-        new Chart(document.getElementById('passRateChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Đỗ (≥5 điểm)', 'Rớt (<5 điểm)'],
-                datasets: [{
-                    data: [68, 32],
-                    backgroundColor: ['#28a745', '#dc3545'],
-                    borderWidth: 0
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
-        });
-
-        function exportExcel() { alert('Xuất file Excel thành công!'); }
-        function exportPDF() { alert('Xuất file PDF thành công!'); }
-    </script>
+@{ ViewData["Title"] = "Thống kê nâng cao"; }
+<div class="pro-page-title"><div><h2>📊 Thống kê nâng cao</h2><p>Tất cả số liệu lấy từ database: lượt thi, điểm số, tỷ lệ đạt và thống kê theo môn.</p></div></div>
+<div class="row g-4 mb-4">
+ <div class="col-md-3"><div class="metric-card"><div class="metric-icon"><i class="bi-people"></i></div><div class="metric-value" id="totalUsers">0</div><div class="metric-label">Người dùng</div></div></div>
+ <div class="col-md-3"><div class="metric-card"><div class="metric-icon"><i class="bi-file-earmark-text"></i></div><div class="metric-value" id="totalExams">0</div><div class="metric-label">Kỳ thi</div></div></div>
+ <div class="col-md-3"><div class="metric-card"><div class="metric-icon"><i class="bi-pencil-square"></i></div><div class="metric-value" id="totalAttempts">0</div><div class="metric-label">Lượt thi đã chấm</div></div></div>
+ <div class="col-md-3"><div class="metric-card"><div class="metric-icon"><i class="bi-check-circle"></i></div><div class="metric-value"><span id="passRate">0</span>%</div><div class="metric-label">Tỷ lệ đạt</div></div></div>
+</div>
+<div class="row g-4 mb-4">
+ <div class="col-xl-6"><div class="chart-card"><h5 class="mb-3">📈 Phân bố điểm</h5><canvas id="scoreDist" height="150"></canvas></div></div>
+ <div class="col-xl-6"><div class="chart-card"><h5 class="mb-3">🏆 Top học sinh</h5><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Hạng</th><th>Học sinh</th><th>Lượt thi</th><th>Điểm TB</th><th>Cao nhất</th></tr></thead><tbody id="topRows"></tbody></table></div></div></div>
+</div>
+<div class="chart-card"><h5 class="mb-3">📚 Theo môn học</h5><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Môn học</th><th>Số đề</th><th>Lượt thi</th><th>Điểm TB</th><th>Tỷ lệ đạt</th></tr></thead><tbody id="subjectRows"></tbody></table></div></div>
+@section Scripts{
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+Promise.all([fetch('/api/Api/statistics/overview').then(r=>r.json()), fetch('/api/Api/statistics/top-students').then(r=>r.json()), fetch('/api/Api/statistics/by-subject').then(r=>r.json())]).then(([o,top,subs])=>{
+ totalUsers.textContent=o.totalUsers||0; totalExams.textContent=o.totalExams||0; totalAttempts.textContent=o.totalAttempts||0; passRate.textContent=o.passRate||0;
+ if(window.Chart) new Chart(document.getElementById('scoreDist'),{type:'bar',data:{labels:['0-2','2-4','4-6','6-8','8-10'],datasets:[{label:'Số lượt',data:o.scoreDistribution||[]}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}});
+ topRows.innerHTML=(top||[]).map(x=>`<tr><td>#${x.rank}</td><td><b>${x.name}</b></td><td>${x.exams}</td><td><b>${x.avgScore}</b>/10</td><td>${x.highest}</td></tr>`).join('')||'<tr><td colspan="5" class="text-muted text-center py-4">Chưa có dữ liệu</td></tr>';
+ subjectRows.innerHTML=(subs||[]).map(x=>`<tr><td><b>${x.subject}</b></td><td>${x.exams}</td><td>${x.attempts}</td><td>${x.avgScore}/10</td><td>${x.passRate}%</td></tr>`).join('')||'<tr><td colspan="5" class="text-muted text-center py-4">Chưa có dữ liệu</td></tr>';
+});
+</script>
 }

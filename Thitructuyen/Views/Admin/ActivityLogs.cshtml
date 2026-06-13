@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Audit Log";
+}
+<div class="pro-page-title">
+    <div>
+        <h2>🧾 Audit Log hoạt động hệ thống</h2>
+        <p>Theo dõi đăng nhập, nộp bài, vi phạm Anti-cheat và các hành động quan trọng.</p>
+    </div>
+    <button class="btn btn-primary" onclick="loadLogs()"><i class="bi-arrow-repeat me-1"></i> Tải lại</button>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <select class="form-select" id="actionFilter" onchange="loadLogs()">
+                    <option value="">Tất cả hành động</option>
+                    <option value="Login">Login</option>
+                    <option value="SubmitExam">SubmitExam</option>
+                    <option value="Violation">Violation</option>
+                </select>
+            </div>
+            <div class="col-md-6"><input class="form-control" id="searchFilter" placeholder="Tìm trong mô tả..." oninput="debouncedLoadLogs()"></div>
+            <div class="col-md-2"><button class="btn btn-outline-secondary w-100" onclick="resetFilter()">Reset</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-pro align-middle">
+            <thead><tr><th>#</th><th>Thời gian</th><th>UserId</th><th>Hành động</th><th>Chi tiết</th><th>IP</th></tr></thead>
+            <tbody id="logBody"><tr><td colspan="6" class="text-center text-muted py-4">Đang tải...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let timer;
+function debouncedLoadLogs(){ clearTimeout(timer); timer=setTimeout(loadLogs, 350); }
+function resetFilter(){ document.getElementById('actionFilter').value=''; document.getElementById('searchFilter').value=''; loadLogs(); }
+function loadLogs(){
+    const action = document.getElementById('actionFilter').value;
+    const search = document.getElementById('searchFilter').value;
+    const params = new URLSearchParams();
+    if(action) params.append('action', action);
+    if(search) params.append('search', search);
+    fetch('/api/dashboard/audit-logs?' + params.toString()).then(r=>r.json()).then(data=>{
+        const body = document.getElementById('logBody');
+        if(!data || data.length===0){ body.innerHTML='<tr><td colspan="6" class="text-center text-muted py-4">Không có dữ liệu</td></tr>'; return; }
+        body.innerHTML = data.map((x,i)=>`<tr><td>${i+1}</td><td>${x.createdAt}</td><td>${x.userId ?? ''}</td><td><span class="badge ${x.action==='Violation'?'bg-danger':x.action==='Login'?'bg-success':'bg-primary'}">${x.action}</span></td><td>${x.detail}</td><td>${x.ipAddress||''}</td></tr>`).join('');
+    });
+}
+loadLogs();
+</script>
+}

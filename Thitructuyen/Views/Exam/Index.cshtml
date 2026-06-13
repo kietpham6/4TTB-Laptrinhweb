@@ -1,5 +1,14 @@
-﻿@{
+﻿@model IEnumerable<Thitructuyen.Models.Exam>
+@{
     ViewData["Title"] = "Danh sách bài thi";
+    var now = DateTime.Now;
+}
+
+@if (TempData["ExamError"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-warning text-center">@TempData["ExamError"]</div>
+    </div>
 }
 
 <section class="services-section section-padding">
@@ -12,71 +21,66 @@
         </div>
 
         <div class="row g-4">
-            <!-- Exam Card 1 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <span class="badge bg-primary px-3 py-2">60 phút</span>
-                            <span class="badge bg-success">Mới</span>
-                        </div>
-                        <h4 class="mb-2">Kiểm tra giữa kỳ</h4>
-                        <p class="text-muted small mb-3">Lập trình Web - 50 câu hỏi</p>
-                        <p class="small text-muted mb-3">
-                            <i class="bi-calendar me-1"></i> Hạn: 30/03/2026<br>
-                            <i class="bi-people me-1"></i> 45 người đã tham gia
-                        </p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-success fw-bold">Miễn phí</span>
-                            <a href="/Exam/TakeExam/1" class="btn btn-primary">Làm bài ngay →</a>
-                        </div>
-                    </div>
+            @if (Model == null || !Model.Any())
+            {
+                <div class="col-12 text-center text-muted py-5">
+                    <i class="bi-inbox" style="font-size:48px;"></i>
+                    <p class="mt-3">Hiện chưa có bài thi nào.</p>
                 </div>
-            </div>
+            }
+            else
+            {
+                foreach (var exam in Model)
+                {
+                    var isUpcoming = now < exam.StartTime;
+                    var isClosed = now > exam.EndTime;
+                    var isOpen = !isUpcoming && !isClosed;
+                    var questionCount = exam.Questions?.Count ?? 0;
 
-            <!-- Exam Card 2 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <span class="badge bg-primary px-3 py-2">90 phút</span>
-                            <span class="badge bg-warning">Sắp kết thúc</span>
-                        </div>
-                        <h4 class="mb-2">Ôn tập cuối kỳ</h4>
-                        <p class="text-muted small mb-3">Cơ sở dữ liệu - 80 câu hỏi</p>
-                        <p class="small text-muted mb-3">
-                            <i class="bi-calendar me-1"></i> Hạn: 25/03/2026<br>
-                            <i class="bi-people me-1"></i> 38 người đã tham gia
-                        </p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-success fw-bold">Miễn phí</span>
-                            <a href="/Exam/TakeExam/2" class="btn btn-outline-primary">Làm bài ngay →</a>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="badge bg-primary px-3 py-2">@exam.Duration phút</span>
+                                    @if (isOpen)
+                                    {
+                                        <span class="badge bg-success">Đang mở</span>
+                                    }
+                                    else if (isUpcoming)
+                                    {
+                                        <span class="badge bg-secondary">Sắp diễn ra</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Đã kết thúc</span>
+                                    }
+                                </div>
+                                <h4 class="mb-2">@exam.Title</h4>
+                                <p class="text-muted small mb-3">@exam.Description - @questionCount câu hỏi</p>
+                                <p class="small text-muted mb-3">
+                                    <i class="bi-calendar me-1"></i> Mở: @exam.StartTime.ToString("dd/MM/yyyy HH:mm")<br>
+                                    <i class="bi-calendar-check me-1"></i> Hạn: @exam.EndTime.ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-success fw-bold">Miễn phí</span>
+                                    @if (isOpen)
+                                    {
+                                        <a href="/Exam/TakeExam/@exam.Id" class="btn btn-primary">Làm bài ngay →</a>
+                                    }
+                                    else if (isUpcoming)
+                                    {
+                                        <button class="btn btn-secondary" disabled>Chưa mở</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-secondary" disabled>Đã đóng</button>
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Exam Card 3 -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <span class="badge bg-primary px-3 py-2">45 phút</span>
-                            <span class="badge bg-secondary">Sắp diễn ra</span>
-                        </div>
-                        <h4 class="mb-2">Đánh giá năng lực</h4>
-                        <p class="text-muted small mb-3">Tiếng Anh B1 - 40 câu hỏi</p>
-                        <p class="small text-muted mb-3">
-                            <i class="bi-calendar me-1"></i> Hạn: 05/04/2026<br>
-                            <i class="bi-people me-1"></i> 52 người đã đăng ký
-                        </p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-success fw-bold">Miễn phí</span>
-                            <button class="btn btn-secondary" disabled>Chưa mở</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                }
+            }
         </div>
     </div>
 </section>

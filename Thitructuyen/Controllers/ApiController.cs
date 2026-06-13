@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.RegularExpressions;
+using Thitructuyen.Data;
+using Thitructuyen.Helpers;
+using Thitructuyen.Models;
 
 namespace Thitructuyen.Controllers
 {
@@ -10,54 +13,80 @@ namespace Thitructuyen.Controllers
     [ApiController]
     public class ApiController : ControllerBase
     {
-        // ========== USER MANAGEMENT ==========
+        private readonly ApplicationDbContext _context;
+        public ApiController(ApplicationDbContext context) => _context = context;
+
+        private int? CurrentUserId()
+        {
+            var v = User.FindFirst("UserId")?.Value;
+            return int.TryParse(v, out var id) ? id : (int?)null;
+        }
+
+        // ========== USER MANAGEMENT (Admin) ==========
 
         [HttpGet("users")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetUsers(string? role = null, string? status = null, string? search = null)
         {
-            // Demo data - thực tế lấy từ database
-            var users = new List<object>
+            var q = _context.Users.AsQueryable();
+            if (!string.IsNullOrEmpty(role)) q = q.Where(u => u.Role == role);
+            if (!string.IsNullOrEmpty(status)) q = q.Where(u => u.Status == status);
+            if (!string.IsNullOrEmpty(search))
             {
-                new { id = 1, username = "admin", fullname = "Quản trị viên", email = "admin@example.com", role = "Admin", status = "Active", avatar = "/Temp/images/avatar/admin.jpg", createdAt = "2024-01-01" },
-                new { id = 2, username = "teacher", fullname = "Giảng viên A", email = "teacher@example.com", role = "Teacher", status = "Active", avatar = "/Temp/images/avatar/teacher.jpg", createdAt = "2024-01-15" },
-                new { id = 3, username = "student", fullname = "Nguyễn Văn B", email = "student@example.com", role = "Student", status = "Active", avatar = "/Temp/images/avatar/student.jpg", createdAt = "2024-02-10" }
-            };
-
-            var result = new List<object>();
-            foreach (var user in users)
-            {
-                var userRole = user.GetType().GetProperty("role")?.GetValue(user)?.ToString();
-                var userStatus = user.GetType().GetProperty("status")?.GetValue(user)?.ToString();
-                var userFullname = user.GetType().GetProperty("fullname")?.GetValue(user)?.ToString();
-                var userEmail = user.GetType().GetProperty("email")?.GetValue(user)?.ToString();
-
-                bool match = true;
-                if (!string.IsNullOrEmpty(role) && userRole != role) match = false;
-                if (!string.IsNullOrEmpty(status) && userStatus != status) match = false;
-                if (!string.IsNullOrEmpty(search) &&
-                    !(userFullname != null && userFullname.ToLower().Contains(search.ToLower())) &&
-                    !(userEmail != null && userEmail.ToLower().Contains(search.ToLower()))) match = false;
-
-                if (match) result.Add(user);
+                var s = search.ToLower();
+                q = q.Where(u => u.FullName.ToLower().Contains(s) || u.Email.ToLower().Contains(s) || u.Username.ToLower().Contains(s));
             }
+
+            var result = q.OrderBy(u => u.Id).Select(u => new
+            {
+                id = u.Id,
+                username = u.Username,
+                fullname = u.FullName,
+                email = u.Email,
+                role = u.Role,
+                status = u.Status,
+                avatar = string.IsNullOrEmpty(u.AvatarUrl) ? "/Temp/images/avatar/default-avatar.png" : u.AvatarUrl,
+                createdAt = u.CreatedAt.ToString("yyyy-MM-dd")
+            }).ToList();
 
             return Ok(result);
         }
 
         [HttpPost("user")]
+        [Authorize(Roles = "Admin")]
         public IActionResult CreateUser([FromBody] JsonElement data)
         {
             try
             {
-                var username = data.GetProperty("username").GetString();
-                var fullname = data.GetProperty("fullname").GetString();
-                var email = data.GetProperty("email").GetString();
-                var role = data.GetProperty("role").GetString();
+                var username = data.GetProperty("username").GetString() ?? "";
+                var fullname = data.GetProperty("fullname").GetString() ?? "";
+                var email = data.GetProperty("email").GetString() ?? "";
+                var role = data.GetProperty("role").GetString() ?? "Student";
+                var password = data.TryGetProperty("password", out var p) ? p.GetString() ?? "" : "";
 
-                var newId = new Random().Next(100, 999);
-                var newUser = new { id = newId, username = username, fullname = fullname, email = email, role = role, status = "Active", avatar = "/Temp/images/avatar/default-avatar.png", createdAt = DateTime.Now.ToString("yyyy-MM-dd") };
+                if (string.IsNullOrEmpty(password) || password.Length < 6) // R03
+                    return Ok(new { success = false, message = "Mật khẩu tối thiểu 6 ký tự!" });
+                if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) // R02
+                    return Ok(new { success = false, message = "Email không đúng định dạng!" });
+                if (_context.Users.Any(u => u.Username == username)) // R01
+                    return Ok(new { success = false, message = "Tên đăng nhập đã tồn tại!" });
 
-                return Ok(new { success = true, message = "Thêm người dùng thành công!", user = newUser });
+                var user = new User
+                {
+                    Username = username,
+                    FullName = fullname,
+                    Email = email,
+                    Role = role,
+                    Password = PasswordHasher.Hash(password),
+                    Status = "Active",
+                    CreatedAt = DateTime.Now,
+                    AvatarUrl = "/Temp/images/avatar/default-avatar.png"
+                };
+                _context.Users.Add(user);
+                _context.SaveChanges();
+
+                var dto = new { id = user.Id, username = user.Username, fullname = user.FullName, email = user.Email, role = user.Role, status = user.Status, avatar = user.AvatarUrl, createdAt = user.CreatedAt.ToString("yyyy-MM-dd") };
+                return Ok(new { success = true, message = "Thêm người dùng thành công!", user = dto });
             }
             catch (Exception ex)
             {
@@ -66,15 +95,26 @@ namespace Thitructuyen.Controllers
         }
 
         [HttpPut("user/{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateUser(int id, [FromBody] JsonElement data)
         {
             try
             {
-                var fullname = data.GetProperty("fullname").GetString();
-                var email = data.GetProperty("email").GetString();
-                var role = data.GetProperty("role").GetString();
-                var status = data.GetProperty("status").GetString();
+                var user = _context.Users.Find(id);
+                if (user == null) return Ok(new { success = false, message = "Không tìm thấy người dùng!" });
 
+                if (data.TryGetProperty("fullname", out var f)) user.FullName = f.GetString() ?? user.FullName;
+                if (data.TryGetProperty("email", out var e))
+                {
+                    var email = e.GetString() ?? "";
+                    if (!string.IsNullOrEmpty(email) && !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                        return Ok(new { success = false, message = "Email không đúng định dạng!" });
+                    user.Email = email;
+                }
+                if (data.TryGetProperty("role", out var r)) user.Role = r.GetString() ?? user.Role;
+                if (data.TryGetProperty("status", out var s)) user.Status = s.GetString() ?? user.Status;
+
+                _context.SaveChanges();
                 return Ok(new { success = true, message = "Cập nhật người dùng thành công!" });
             }
             catch (Exception ex)
@@ -84,19 +124,33 @@ namespace Thitructuyen.Controllers
         }
 
         [HttpDelete("user/{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteUser(int id)
         {
+            var user = _context.Users.Find(id);
+            if (user == null) return Ok(new { success = false, message = "Không tìm thấy người dùng!" });
+            if (user.Role == "Admin") return Ok(new { success = false, message = "Không thể xóa tài khoản Admin!" });
+            _context.Users.Remove(user);
+            _context.SaveChanges();
             return Ok(new { success = true, message = "Xóa người dùng thành công!" });
         }
 
         [HttpPost("user/{id}/lock")]
+        [Authorize(Roles = "Admin")]
         public IActionResult LockUser(int id, [FromBody] JsonElement data)
         {
             try
             {
-                var status = data.GetProperty("status").GetString();
+                var user = _context.Users.Find(id);
+                if (user == null) return Ok(new { success = false, message = "Không tìm thấy người dùng!" });
+
+                var status = data.GetProperty("status").GetString() ?? "Active";
+                user.Status = status;
+                if (status == "Active") { user.LockoutEnd = null; user.FailedLoginAttempts = 0; }
+                _context.SaveChanges();
+
                 var message = status == "Locked" ? "Đã khóa người dùng!" : "Đã mở khóa người dùng!";
-                return Ok(new { success = true, message = message });
+                return Ok(new { success = true, message });
             }
             catch (Exception ex)
             {
@@ -104,61 +158,131 @@ namespace Thitructuyen.Controllers
             }
         }
 
-        // ========== QUESTION MANAGEMENT ==========
 
-        private static List<dynamic> questions = new List<dynamic>();
-
-        static ApiController()
+        [HttpGet("subjects")]
+        [Authorize]
+        public IActionResult GetSubjects()
         {
-            // Khởi tạo dữ liệu mẫu
-            questions.Add(new { id = 1, content = "HTML là viết tắt của từ gì?", subject = "Lập trình Web", chapter = "HTML/CSS", difficulty = "Dễ", type = "Trắc nghiệm", points = 1, optionA = "Hyper Text Markup Language", optionB = "Hyper Tool Markup Language", optionC = "Home Text Markup Language", optionD = "None", correctAnswer = "A" });
-            questions.Add(new { id = 2, content = "CSS dùng để làm gì?", subject = "Lập trình Web", chapter = "HTML/CSS", difficulty = "Dễ", type = "Trắc nghiệm", points = 1, optionA = "Xử lý dữ liệu", optionB = "Trang trí giao diện", optionC = "Kết nối database", optionD = "Xử lý form", correctAnswer = "B" });
-            questions.Add(new { id = 3, content = "Trong SQL, câu lệnh nào dùng để truy vấn dữ liệu?", subject = "Cơ sở dữ liệu", chapter = "SQL cơ bản", difficulty = "TB", type = "Trắc nghiệm", points = 1, optionA = "INSERT", optionB = "UPDATE", optionC = "SELECT", optionD = "DELETE", correctAnswer = "C" });
+            var subjects = _context.Subjects.AsNoTracking().OrderBy(s => s.SubjectName).ToList();
+            var result = subjects.Select(s => new
+            {
+                id = s.Id,
+                code = s.SubjectCode,
+                name = s.SubjectName,
+                description = s.Description,
+                credits = s.Credits,
+                department = s.Department,
+                isActive = s.IsActive,
+                status = s.IsActive ? "Hoạt động" : "Tạm dừng",
+                questionCount = _context.Questions.Count(q => q.SubjectId == s.Id)
+            }).ToList();
+            return Ok(result);
         }
 
+        [HttpPost("subject")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult CreateSubjectApi([FromBody] JsonElement data)
+        {
+            var code = data.TryGetProperty("code", out var c) ? c.GetString()?.Trim() ?? "" : "";
+            var name = data.TryGetProperty("name", out var n) ? n.GetString()?.Trim() ?? "" : "";
+            var department = data.TryGetProperty("department", out var d) ? d.GetString() ?? "" : "";
+            var description = data.TryGetProperty("description", out var ds) ? ds.GetString() ?? "" : "";
+            var credits = data.TryGetProperty("credits", out var cr) && cr.TryGetInt32(out var cv) ? cv : 3;
+            if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(name)) return Ok(new { success = false, message = "Vui lòng nhập mã môn và tên môn học!" });
+            if (_context.Subjects.Any(s => s.SubjectCode == code)) return Ok(new { success = false, message = "Mã môn học đã tồn tại!" });
+            _context.Subjects.Add(new Subject { SubjectCode = code, SubjectName = name, Department = department, Description = description, Credits = credits, IsActive = true });
+            _context.SaveChanges();
+            return Ok(new { success = true, message = "Thêm môn học thành công!" });
+        }
+
+        [HttpPut("subject/{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult UpdateSubjectApi(int id, [FromBody] JsonElement data)
+        {
+            var s = _context.Subjects.Find(id);
+            if (s == null) return Ok(new { success = false, message = "Không tìm thấy môn học!" });
+            if (data.TryGetProperty("code", out var c)) s.SubjectCode = c.GetString() ?? s.SubjectCode;
+            if (data.TryGetProperty("name", out var n)) s.SubjectName = n.GetString() ?? s.SubjectName;
+            if (data.TryGetProperty("department", out var d)) s.Department = d.GetString() ?? s.Department;
+            if (data.TryGetProperty("description", out var ds)) s.Description = ds.GetString() ?? s.Description;
+            if (data.TryGetProperty("credits", out var cr) && cr.TryGetInt32(out var cv)) s.Credits = cv;
+            if (data.TryGetProperty("isActive", out var ia)) s.IsActive = ia.ValueKind == JsonValueKind.True || (ia.ValueKind == JsonValueKind.String && ia.GetString() == "Hoạt động");
+            _context.SaveChanges();
+            return Ok(new { success = true, message = "Cập nhật môn học thành công!" });
+        }
+
+        [HttpDelete("subject/{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult DeleteSubjectApi(int id)
+        {
+            var s = _context.Subjects.Find(id);
+            if (s == null) return Ok(new { success = false, message = "Không tìm thấy môn học!" });
+            if (_context.Questions.Any(q => q.SubjectId == id) || _context.Exams.Any(e => e.SubjectId == id))
+                return Ok(new { success = false, message = "Không thể xóa môn học đã có câu hỏi hoặc kỳ thi. Hãy tạm dừng môn học thay vì xóa." });
+            _context.Subjects.Remove(s);
+            _context.SaveChanges();
+            return Ok(new { success = true, message = "Xóa môn học thành công!" });
+        }
+
+        // ========== QUESTION BANK (R10-R16) ==========
+
         [HttpGet("questions")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult GetQuestions(string? subject = null, string? chapter = null, string? difficulty = null, string? type = null, string? search = null)
         {
-            var result = new List<dynamic>();
-            foreach (var q in questions)
+            var q = _context.Questions.Include(x => x.Subject).Include(x => x.Chapter).AsQueryable();
+            if (!string.IsNullOrEmpty(difficulty)) q = q.Where(x => x.Difficulty == difficulty);
+            if (!string.IsNullOrEmpty(type)) q = q.Where(x => x.QuestionType == type);
+            if (!string.IsNullOrEmpty(subject)) q = q.Where(x => x.Subject != null && x.Subject.SubjectName == subject);
+            if (!string.IsNullOrEmpty(search)) q = q.Where(x => x.Text.ToLower().Contains(search.ToLower()));
+
+            var result = q.OrderBy(x => x.Id).Select(x => new
             {
-                bool match = true;
-                if (!string.IsNullOrEmpty(subject) && q.subject != subject) match = false;
-                if (!string.IsNullOrEmpty(chapter) && q.chapter != chapter) match = false;
-                if (!string.IsNullOrEmpty(difficulty) && q.difficulty != difficulty) match = false;
-                if (!string.IsNullOrEmpty(type) && q.type != type) match = false;
-                if (!string.IsNullOrEmpty(search) && !q.content.ToString().ToLower().Contains(search.ToLower())) match = false;
-
-                if (match) result.Add(q);
-            }
-
+                id = x.Id,
+                content = x.Text,
+                subject = x.Subject != null ? x.Subject.SubjectName : "",
+                chapter = x.Chapter != null ? x.Chapter.ChapterName : "",
+                difficulty = x.Difficulty,
+                type = x.QuestionType,
+                points = x.Points,
+                optionA = x.OptionA,
+                optionB = x.OptionB,
+                optionC = x.OptionC,
+                optionD = x.OptionD,
+                correctAnswer = x.CorrectAnswer
+            }).ToList();
             return Ok(result);
         }
 
         [HttpPost("question")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult CreateQuestion([FromBody] JsonElement data)
         {
             try
             {
-                var newId = questions.Count + 1;
-                var newQuestion = new
-                {
-                    id = newId,
-                    content = data.GetProperty("content").GetString(),
-                    subject = data.GetProperty("subject").GetString(),
-                    chapter = data.GetProperty("chapter").GetString(),
-                    difficulty = data.GetProperty("difficulty").GetString(),
-                    type = data.GetProperty("type").GetString(),
-                    points = data.GetProperty("points").GetInt32(),
-                    optionA = data.GetProperty("optionA").GetString(),
-                    optionB = data.GetProperty("optionB").GetString(),
-                    optionC = data.GetProperty("optionC").GetString(),
-                    optionD = data.GetProperty("optionD").GetString(),
-                    correctAnswer = data.GetProperty("correctAnswer").GetString()
-                };
+                int points = data.TryGetProperty("points", out var pp) ? pp.GetInt32() : 1;
+                if (points < 1) points = 1; // R14 (lưu nguyên, doc 0.5-10 với câu hỏi tính điểm phần thi)
 
-                questions.Add(newQuestion);
-                return Ok(new { success = true, message = "Thêm câu hỏi thành công!", question = newQuestion });
+                var subjectName = data.TryGetProperty("subject", out var sj) ? sj.GetString() : null;
+                var subjectId = string.IsNullOrEmpty(subjectName) ? (int?)null
+                    : _context.Subjects.FirstOrDefault(s => s.SubjectName == subjectName)?.Id;
+
+                var question = new Question
+                {
+                    Text = data.GetProperty("content").GetString() ?? "",
+                    SubjectId = subjectId,
+                    Difficulty = data.TryGetProperty("difficulty", out var d) ? d.GetString() ?? "Trung bình" : "Trung bình",
+                    QuestionType = data.TryGetProperty("type", out var t) ? t.GetString() ?? "Trắc nghiệm" : "Trắc nghiệm",
+                    Points = points,
+                    OptionA = data.TryGetProperty("optionA", out var a) ? a.GetString() ?? "" : "",
+                    OptionB = data.TryGetProperty("optionB", out var b) ? b.GetString() ?? "" : "",
+                    OptionC = data.TryGetProperty("optionC", out var c) ? c.GetString() ?? "" : "",
+                    OptionD = data.TryGetProperty("optionD", out var e) ? e.GetString() ?? "" : "",
+                    CorrectAnswer = data.TryGetProperty("correctAnswer", out var ca) ? ca.GetString() ?? "" : ""
+                };
+                _context.Questions.Add(question);
+                _context.SaveChanges();
+                return Ok(new { success = true, message = "Thêm câu hỏi thành công!", id = question.Id });
             }
             catch (Exception ex)
             {
@@ -167,61 +291,121 @@ namespace Thitructuyen.Controllers
         }
 
         [HttpPut("question/{id}")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult UpdateQuestion(int id, [FromBody] JsonElement data)
         {
+            var qn = _context.Questions.Find(id);
+            if (qn == null) return Ok(new { success = false, message = "Không tìm thấy câu hỏi!" });
+            if (data.TryGetProperty("content", out var c)) qn.Text = c.GetString() ?? qn.Text;
+            if (data.TryGetProperty("difficulty", out var d)) qn.Difficulty = d.GetString() ?? qn.Difficulty;
+            if (data.TryGetProperty("type", out var t)) qn.QuestionType = t.GetString() ?? qn.QuestionType;
+            if (data.TryGetProperty("points", out var p)) qn.Points = p.GetInt32();
+            if (data.TryGetProperty("optionA", out var a)) qn.OptionA = a.GetString() ?? qn.OptionA;
+            if (data.TryGetProperty("optionB", out var b)) qn.OptionB = b.GetString() ?? qn.OptionB;
+            if (data.TryGetProperty("optionC", out var cc)) qn.OptionC = cc.GetString() ?? qn.OptionC;
+            if (data.TryGetProperty("optionD", out var dd)) qn.OptionD = dd.GetString() ?? qn.OptionD;
+            if (data.TryGetProperty("correctAnswer", out var ca)) qn.CorrectAnswer = ca.GetString() ?? qn.CorrectAnswer;
+            _context.SaveChanges();
             return Ok(new { success = true, message = "Cập nhật câu hỏi thành công!" });
         }
 
         [HttpDelete("question/{id}")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult DeleteQuestion(int id)
         {
-            for (int i = 0; i < questions.Count; i++)
-            {
-                if (questions[i].id == id)
-                {
-                    questions.RemoveAt(i);
-                    break;
-                }
-            }
+            var qn = _context.Questions.Find(id);
+            if (qn == null) return Ok(new { success = false, message = "Không tìm thấy câu hỏi!" });
+            _context.Questions.Remove(qn);
+            _context.SaveChanges();
             return Ok(new { success = true, message = "Xóa câu hỏi thành công!" });
         }
 
         // ========== EXAM MANAGEMENT ==========
 
-        private static List<dynamic> exams = new List<dynamic>();
-
-        static void InitExams()
+        private static string ExamStatus(Exam e)
         {
-            exams.Add(new { id = 1, title = "Kiểm tra giữa kỳ", subject = "Lập trình Web", duration = 60, totalQuestions = 50, startTime = "2026-03-15", endTime = "2026-04-15", status = "Đang diễn ra" });
-            exams.Add(new { id = 2, title = "Ôn tập cuối kỳ", subject = "Cơ sở dữ liệu", duration = 90, totalQuestions = 80, startTime = "2026-03-20", endTime = "2026-04-20", status = "Sắp diễn ra" });
+            var now = DateTime.Now;
+            if (now < e.StartTime) return "Chưa bắt đầu";
+            if (now > e.EndTime) return "Đã kết thúc";
+            return "Đang diễn ra";
         }
 
         [HttpGet("exams")]
+        [Authorize]
         public IActionResult GetExams()
         {
-            InitExams();
-            return Ok(exams);
+            var exams = _context.Exams
+                .Include(e => e.Subject)
+                .Include(e => e.Questions)
+                .OrderByDescending(e => e.StartTime)
+                .ToList();
+
+            var attempts = _context.ExamAttempts.Where(a => a.Score != null || a.SubmitTime != null).ToList();
+            var result = exams.Select(e =>
+            {
+                var examAttempts = attempts.Where(a => a.ExamId == e.Id).ToList();
+                var statusText = ExamStatus(e);
+                var statusCode = statusText == "Đang diễn ra" ? "ongoing" : statusText == "Đã kết thúc" ? "ended" : "upcoming";
+                return new
+                {
+                    id = e.Id,
+                    title = e.Title,
+                    name = e.Title,
+                    subject = e.Subject != null ? e.Subject.SubjectName : e.Description,
+                    duration = e.Duration,
+                    durationText = e.Duration + " phút",
+                    totalQuestions = e.Questions != null ? e.Questions.Count : 0,
+                    questions = e.Questions != null ? e.Questions.Count : 0,
+                    startTime = e.StartTime.ToString("yyyy-MM-ddTHH:mm"),
+                    endTime = e.EndTime.ToString("yyyy-MM-ddTHH:mm"),
+                    startDate = e.StartTime.ToString("dd/MM/yyyy HH:mm"),
+                    endDate = e.EndTime.ToString("dd/MM/yyyy HH:mm"),
+                    attempts = examAttempts.Count,
+                    avgScore = examAttempts.Any(a => a.Score.HasValue) ? Math.Round(examAttempts.Where(a => a.Score.HasValue).Average(a => a.Score!.Value), 1).ToString("0.0") : "-",
+                    status = statusCode,
+                    statusText,
+                    statusClass = statusCode == "ongoing" ? "bg-success" : statusCode == "ended" ? "bg-secondary" : "bg-warning"
+                };
+            }).ToList();
+            return Ok(result);
         }
 
         [HttpPost("exam")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult CreateExam([FromBody] JsonElement data)
         {
             try
             {
-                var newId = exams.Count + 1;
-                var newExam = new
+                var title = data.GetProperty("title").GetString() ?? "";
+                var duration = data.TryGetProperty("duration", out var d) ? d.GetInt32() : 60;
+                var startStr = data.TryGetProperty("startTime", out var st) ? st.GetString() : null;
+                var endStr = data.TryGetProperty("endTime", out var et) ? et.GetString() : null;
+                DateTime.TryParse(startStr, out var start);
+                DateTime.TryParse(endStr, out var end);
+
+                var subjectName = data.TryGetProperty("subject", out var sj) ? sj.GetString() : null;
+                var subjectId = string.IsNullOrEmpty(subjectName) ? (int?)null
+                    : _context.Subjects.FirstOrDefault(s => s.SubjectName == subjectName)?.Id;
+
+                // R17: trùng tên trong cùng môn học
+                if (_context.Exams.Any(x => x.Title == title && x.SubjectId == subjectId))
+                    return Ok(new { success = false, message = "Tên đề thi đã tồn tại trong môn học này!" });
+                // R19
+                if (start != default && end != default && start >= end)
+                    return Ok(new { success = false, message = "Ngày bắt đầu phải trước ngày kết thúc!" });
+
+                var exam = new Exam
                 {
-                    id = newId,
-                    title = data.GetProperty("title").GetString(),
-                    subject = data.GetProperty("subject").GetString(),
-                    duration = data.GetProperty("duration").GetInt32(),
-                    totalQuestions = data.GetProperty("totalQuestions").GetInt32(),
-                    startTime = data.GetProperty("startTime").GetString(),
-                    endTime = data.GetProperty("endTime").GetString(),
-                    status = "Sắp diễn ra"
+                    Title = title,
+                    Description = subjectName ?? "",
+                    Duration = duration,
+                    StartTime = start == default ? DateTime.Now : start,
+                    EndTime = end == default ? DateTime.Now.AddDays(7) : end,
+                    SubjectId = subjectId
                 };
-                exams.Add(newExam);
-                return Ok(new { success = true, message = "Tạo đề thi thành công!", exam = newExam });
+                _context.Exams.Add(exam);
+                _context.SaveChanges();
+                return Ok(new { success = true, message = "Tạo đề thi thành công!", id = exam.Id });
             }
             catch (Exception ex)
             {
@@ -230,117 +414,260 @@ namespace Thitructuyen.Controllers
         }
 
         [HttpDelete("exam/{id}")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult DeleteExam(int id)
         {
-            for (int i = 0; i < exams.Count; i++)
+            var exam = _context.Exams.Find(id);
+            if (exam == null) return Ok(new { success = false, message = "Không tìm thấy đề thi!" });
+            // R21: không xóa khi đang có thí sinh làm bài
+            if (_context.ExamAttempts.Any(a => a.ExamId == id && a.Status == "InProgress"))
+                return Ok(new { success = false, message = "Không thể xóa: đang có thí sinh làm bài!" });
+
+            // Dọn dữ liệu phụ thuộc (FK NoAction nên phải xóa thủ công)
+            var attemptIds = _context.ExamAttempts.Where(a => a.ExamId == id).Select(a => a.Id).ToList();
+            if (attemptIds.Count > 0)
             {
-                if (exams[i].id == id)
-                {
-                    exams.RemoveAt(i);
-                    break;
-                }
+                var ans = _context.Answers.Where(a => attemptIds.Contains(a.ExamAttemptId));
+                _context.Answers.RemoveRange(ans);
+                _context.ExamAttempts.RemoveRange(_context.ExamAttempts.Where(a => a.ExamId == id));
             }
+            _context.Exams.Remove(exam);
+            _context.SaveChanges();
             return Ok(new { success = true, message = "Xóa đề thi thành công!" });
         }
 
         // ========== STUDENT HISTORY ==========
 
         [HttpGet("history")]
+        [Authorize(Roles = "Student")]
         public IActionResult GetHistory(string? subject = null, string? month = null)
         {
-            var history = new List<dynamic>();
-            history.Add(new { id = 1, title = "Kiểm tra giữa kỳ", subject = "Lập trình Web", date = "2026-03-15", score = 9.5, ranking = "2/45", status = "Hoàn thành" });
-            history.Add(new { id = 2, title = "Bài tập SQL", subject = "Cơ sở dữ liệu", date = "2026-03-20", score = 7.5, ranking = "15/38", status = "Hoàn thành" });
-            history.Add(new { id = 3, title = "Đánh giá năng lực", subject = "Tiếng Anh", date = "2026-03-25", score = 8.0, ranking = "8/52", status = "Hoàn thành" });
+            var uid = CurrentUserId();
+            if (uid == null) return Ok(new List<object>());
 
-            var result = new List<dynamic>();
-            foreach (var h in history)
+            var attempts = _context.ExamAttempts
+                .Include(a => a.Exam).ThenInclude(e => e!.Subject)
+                .Where(a => a.StudentId == uid && a.SubmitTime != null)
+                .OrderByDescending(a => a.SubmitTime)
+                .ToList();
+
+            var result = new List<object>();
+            foreach (var a in attempts)
             {
-                bool match = true;
-                if (!string.IsNullOrEmpty(subject) && h.subject != subject) match = false;
-                if (!string.IsNullOrEmpty(month) && !h.date.ToString().StartsWith(month)) match = false;
-                if (match) result.Add(h);
-            }
+                var subjName = a.Exam?.Subject?.SubjectName ?? a.Exam?.Description ?? "";
+                if (!string.IsNullOrEmpty(subject) && subjName != subject) continue;
+                var dateStr = a.SubmitTime!.Value.ToString("yyyy-MM-dd");
+                if (!string.IsNullOrEmpty(month) && !dateStr.StartsWith(month)) continue;
 
+                // Xếp hạng trong cùng đề (R37)
+                var scores = _context.ExamAttempts.Where(x => x.ExamId == a.ExamId && x.Score != null)
+                    .Select(x => x.Score!.Value).OrderByDescending(s => s).ToList();
+                int total = scores.Count;
+                int rank = a.Score != null ? scores.IndexOf(a.Score.Value) + 1 : total;
+
+                result.Add(new
+                {
+                    id = a.Id,
+                    title = a.Exam?.Title ?? "",
+                    subject = subjName,
+                    date = dateStr,
+                    score = Math.Round(a.Score ?? 0, 1),
+                    ranking = $"{rank}/{(total == 0 ? 1 : total)}",
+                    status = a.Status == "Graded" ? "Hoàn thành" : "Chờ chấm"
+                });
+            }
             return Ok(result);
         }
 
         [HttpGet("history/{id}")]
+        [Authorize(Roles = "Student")]
         public IActionResult GetHistoryDetail(int id)
         {
-            var answers = new List<dynamic>();
-            answers.Add(new { question = "HTML là viết tắt của từ gì?", userAnswer = "Hyper Text Markup Language", correctAnswer = "Hyper Text Markup Language", isCorrect = true });
-            answers.Add(new { question = "CSS dùng để làm gì?", userAnswer = "Trang trí giao diện", correctAnswer = "Trang trí giao diện", isCorrect = true });
-            answers.Add(new { question = "Trong SQL, câu lệnh nào dùng để truy vấn dữ liệu?", userAnswer = "INSERT", correctAnswer = "SELECT", isCorrect = false });
+            var uid = CurrentUserId();
+            var attempt = _context.ExamAttempts
+                .Include(a => a.Exam)
+                .Include(a => a.Answers)!.ThenInclude(an => an.Question)
+                .FirstOrDefault(a => a.Id == id && a.StudentId == uid);
+
+            if (attempt == null) return NotFound(new { message = "Không tìm thấy bài thi!" });
+
+            var answers = (attempt.Answers ?? new List<Answer>()).Select(an => new
+            {
+                question = an.Question?.Text ?? "",
+                userAnswer = OptionText(an.Question, an.SelectedAnswer),
+                correctAnswer = OptionText(an.Question, an.Question?.CorrectAnswer),
+                isCorrect = an.IsCorrect
+            }).ToList();
+
+            var scores = _context.ExamAttempts.Where(x => x.ExamId == attempt.ExamId && x.Score != null)
+                .Select(x => x.Score!.Value).OrderByDescending(s => s).ToList();
+            int total = scores.Count;
+            int rank = attempt.Score != null ? scores.IndexOf(attempt.Score.Value) + 1 : total;
 
             var detail = new
             {
-                id = id,
-                title = "Kiểm tra giữa kỳ",
-                score = 9.5,
-                ranking = "2/45",
-                totalStudents = 45,
-                teacherComment = "Bài làm tốt! Cần phát huy thêm phần tự luận.",
-                answers = answers
+                id = attempt.Id,
+                title = attempt.Exam?.Title ?? "",
+                score = Math.Round(attempt.Score ?? 0, 1),
+                ranking = rank.ToString(),
+                totalStudents = total == 0 ? 1 : total,
+                teacherComment = attempt.Answers != null && attempt.Answers.Any(x => !string.IsNullOrEmpty(x.TeacherComment))
+                    ? string.Join(" ", attempt.Answers.Where(x => !string.IsNullOrEmpty(x.TeacherComment)).Select(x => x.TeacherComment))
+                    : (attempt.Status == "Graded" ? "Đã chấm xong." : "Đang chờ giáo viên chấm."),
+                answers
             };
-
             return Ok(detail);
         }
 
-        // ========== RANKING ==========
+        private static string OptionText(Question? q, string? ans)
+        {
+            if (q == null || string.IsNullOrEmpty(ans)) return ans ?? "";
+            return ans switch
+            {
+                "A" => q.OptionA,
+                "B" => q.OptionB,
+                "C" => q.OptionC,
+                "D" => q.OptionD,
+                _ => ans
+            };
+        }
+
+        // ========== RANKING (R36-R37) ==========
 
         [HttpGet("ranking")]
+        [Authorize]
         public IActionResult GetRanking(string? subject = null, string? period = null)
         {
-            var rankings = new List<dynamic>();
-            rankings.Add(new { rank = 1, name = "Nguyễn Văn A", exams = 12, avgScore = 9.5, highest = 10, lowest = 8.5, trend = "up", avatar = "/Temp/images/avatar/student1.jpg" });
-            rankings.Add(new { rank = 2, name = "Trần Thị B", exams = 10, avgScore = 8.9, highest = 9.5, lowest = 8.0, trend = "up", avatar = "/Temp/images/avatar/student2.jpg" });
-            rankings.Add(new { rank = 3, name = "Lê Văn C", exams = 8, avgScore = 8.5, highest = 9.0, lowest = 7.5, trend = "down", avatar = "/Temp/images/avatar/student3.jpg" });
-            rankings.Add(new { rank = 4, name = "Phạm Thị D", exams = 15, avgScore = 8.2, highest = 9.0, lowest = 7.0, trend = "up", avatar = "/Temp/images/avatar/default-avatar.png" });
-            rankings.Add(new { rank = 5, name = "Hoàng Văn E", exams = 6, avgScore = 7.8, highest = 8.5, lowest = 7.0, trend = "down", avatar = "/Temp/images/avatar/default-avatar.png" });
+            var q = _context.ExamAttempts
+                .Include(a => a.Student)
+                .Include(a => a.Exam)!
+                .ThenInclude(e => e.Subject)
+                .Where(a => a.Score != null && a.Student != null && a.Student.Role == "Student");
 
-            return Ok(rankings);
+            if (!string.IsNullOrWhiteSpace(subject) && subject != "all")
+                q = q.Where(a => a.Exam != null && ((a.Exam.Subject != null && a.Exam.Subject.SubjectName == subject) || a.Exam.Description == subject));
+
+            var now = DateTime.Now;
+            if (!string.IsNullOrWhiteSpace(period) && period != "all")
+            {
+                DateTime from = period switch
+                {
+                    "month" => new DateTime(now.Year, now.Month, 1),
+                    "quarter" => new DateTime(now.Year, (((now.Month - 1) / 3) * 3) + 1, 1),
+                    "year" => new DateTime(now.Year, 1, 1),
+                    _ => DateTime.MinValue
+                };
+                if (from > DateTime.MinValue) q = q.Where(a => (a.SubmitTime ?? a.StartTime) >= from);
+            }
+
+            var grouped = q.ToList().GroupBy(a => a.Student!)
+                .Select(g => new
+                {
+                    Student = g.Key,
+                    Exams = g.Count(),
+                    Avg = g.Average(x => x.Score!.Value),
+                    Highest = g.Max(x => x.Score!.Value),
+                    Lowest = g.Min(x => x.Score!.Value),
+                    Violations = g.Sum(x => x.ViolationCount)
+                })
+                .OrderByDescending(x => x.Avg)
+                .ThenByDescending(x => x.Highest)
+                .ThenBy(x => x.Violations)
+                .ToList();
+
+            var result = grouped.Select((x, i) => new
+            {
+                rank = i + 1,
+                name = string.IsNullOrWhiteSpace(x.Student.FullName) ? x.Student.Username : x.Student.FullName,
+                fullName = string.IsNullOrWhiteSpace(x.Student.FullName) ? x.Student.Username : x.Student.FullName,
+                exams = x.Exams,
+                attempts = x.Exams,
+                avgScore = Math.Round(x.Avg, 1),
+                highest = Math.Round(x.Highest, 1),
+                bestScore = Math.Round(x.Highest, 1),
+                lowest = Math.Round(x.Lowest, 1),
+                violations = x.Violations,
+                trend = "stable",
+                trendValue = "0",
+                avatar = string.IsNullOrWhiteSpace(x.Student.AvatarUrl) ? "/Temp/images/avatar/default-avatar.png" : x.Student.AvatarUrl
+            }).ToList();
+            return Ok(result);
         }
 
         // ========== STATISTICS ==========
 
         [HttpGet("statistics/overview")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult GetStatisticsOverview()
         {
-            var scoreDistribution = new List<int> { 15, 45, 120, 89, 234 };
+            var graded = _context.ExamAttempts.Where(a => a.Score != null).ToList();
+            int totalAttempts = graded.Count;
+            double avg = totalAttempts > 0 ? graded.Average(a => a.Score!.Value) : 0;
+            int pass = graded.Count(a => a.Score >= 5); // R38
+            int passRate = totalAttempts > 0 ? (int)Math.Round(pass * 100.0 / totalAttempts) : 0;
+
+            // Phân bố điểm: 0-2, 2-4, 4-6, 6-8, 8-10
+            var dist = new int[5];
+            foreach (var a in graded)
+            {
+                var s = a.Score!.Value;
+                int idx = s >= 8 ? 4 : s >= 6 ? 3 : s >= 4 ? 2 : s >= 2 ? 1 : 0;
+                dist[idx]++;
+            }
 
             return Ok(new
             {
-                totalUsers = 1234,
-                totalExams = 156,
-                totalAttempts = 3456,
-                avgScore = 7.8,
-                passRate = 68,
-                failRate = 32,
-                scoreDistribution = scoreDistribution
+                totalUsers = _context.Users.Count(),
+                totalExams = _context.Exams.Count(),
+                totalAttempts,
+                avgScore = Math.Round(avg, 1),
+                passRate,
+                failRate = 100 - passRate,
+                scoreDistribution = dist
             });
         }
 
         [HttpGet("statistics/top-students")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult GetTopStudents()
         {
-            var topStudents = new List<dynamic>();
-            topStudents.Add(new { rank = 1, name = "Nguyễn Văn A", exams = 12, avgScore = 9.5, highest = 10, lowest = 8.5 });
-            topStudents.Add(new { rank = 2, name = "Trần Thị B", exams = 10, avgScore = 8.9, highest = 9.5, lowest = 8.0 });
-            topStudents.Add(new { rank = 3, name = "Lê Văn C", exams = 8, avgScore = 8.5, highest = 9.0, lowest = 7.5 });
+            var data = _context.ExamAttempts
+                .Include(a => a.Student)
+                .Where(a => a.Score != null && a.Student != null && a.Student.Role == "Student")
+                .ToList();
 
-            return Ok(topStudents);
+            var result = data.GroupBy(a => a.Student!)
+                .Select(g => new { S = g.Key, Exams = g.Count(), Avg = g.Average(x => x.Score!.Value), Hi = g.Max(x => x.Score!.Value), Lo = g.Min(x => x.Score!.Value) })
+                .OrderByDescending(x => x.Avg)
+                .Take(10)
+                .Select((x, i) => new { rank = i + 1, name = x.S.FullName, exams = x.Exams, avgScore = Math.Round(x.Avg, 1), highest = Math.Round(x.Hi, 1), lowest = Math.Round(x.Lo, 1) })
+                .ToList();
+            return Ok(result);
         }
 
         [HttpGet("statistics/by-subject")]
+        [Authorize(Roles = "Admin,Teacher")]
         public IActionResult GetStatisticsBySubject()
         {
-            var subjects = new List<dynamic>();
-            subjects.Add(new { subject = "Lập trình Web", exams = 25, attempts = 1234, avgScore = 8.2, passRate = 78 });
-            subjects.Add(new { subject = "Cơ sở dữ liệu", exams = 18, attempts = 987, avgScore = 7.5, passRate = 65 });
-            subjects.Add(new { subject = "Tiếng Anh", exams = 12, attempts = 654, avgScore = 7.8, passRate = 70 });
-
-            return Ok(subjects);
+            var subjects = _context.Subjects.ToList();
+            var result = new List<object>();
+            foreach (var s in subjects)
+            {
+                var examIds = _context.Exams.Where(e => e.SubjectId == s.Id).Select(e => e.Id).ToList();
+                var attempts = _context.ExamAttempts.Where(a => examIds.Contains(a.ExamId) && a.Score != null).ToList();
+                int n = attempts.Count;
+                double avg = n > 0 ? attempts.Average(a => a.Score!.Value) : 0;
+                int pass = attempts.Count(a => a.Score >= 5);
+                result.Add(new
+                {
+                    subject = s.SubjectName,
+                    exams = examIds.Count,
+                    attempts = n,
+                    avgScore = Math.Round(avg, 1),
+                    passRate = n > 0 ? (int)Math.Round(pass * 100.0 / n) : 0
+                });
+            }
+            return Ok(result);
         }
     }
 }

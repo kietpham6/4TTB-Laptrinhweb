@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Leaderboard";
+}
+<div class="pro-page-title">
+    <div>
+        <h2>🏆 Leaderboard học sinh</h2>
+        <p>Xếp hạng theo điểm trung bình, điểm cao nhất và số vi phạm thấp.</p>
+    </div>
+</div>
+<div class="chart-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Hạng</th><th>Học sinh</th><th>Lượt thi</th><th>Điểm TB</th><th>Điểm cao nhất</th><th>Vi phạm</th></tr></thead>
+            <tbody id="leaderBody"><tr><td colspan="6" class="text-center text-muted py-4">Đang tải...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+@section Scripts {
+<script>
+fetch('/api/dashboard/leaderboard').then(r=>r.json()).then(data=>{
+ const body=document.getElementById('leaderBody');
+ if(!data || data.length===0){ body.innerHTML='<tr><td colspan="6" class="text-center text-muted py-4">Chưa có dữ liệu xếp hạng</td></tr>'; return; }
+ body.innerHTML=data.map(x=>`<tr><td><span class="badge bg-warning text-dark">#${x.rank}</span></td><td><div class="d-flex align-items-center gap-2"><img src="${x.avatar}" onerror="this.src='/images/main-logo.png'" style="width:42px;height:42px;border-radius:12px;object-fit:cover"><b>${x.fullName}</b></div></td><td>${x.attempts}</td><td><b>${x.avgScore}</b>/10</td><td>${x.bestScore}/10</td><td>${x.violations}</td></tr>`).join('');
+});
+</script>
+}

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Ngân hàng câu hỏi";
 }
 
@@ -15,12 +15,9 @@
                         <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
                             <i class="bi-plus-lg me-2"></i>Thêm câu hỏi
                         </button>
-                        <button class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#importExcelModal">
-                            <i class="bi-file-excel me-2"></i>Import Excel
-                        </button>
-                        <button class="btn btn-outline-secondary">
-                            <i class="bi-download me-2"></i>Export Excel
-                        </button>
+                        <a class="btn btn-outline-success me-2" href="/Teacher/CreateExam">
+                            <i class="bi-file-earmark-word me-2"></i>Tạo đề từ Word
+                        </a>
                     </div>
                 </div>
             </div>
@@ -55,7 +52,7 @@
                         <select class="form-select" id="filterDifficulty" onchange="filterQuestions()">
                             <option value="all">Tất cả</option>
                             <option value="Dễ">Dễ</option>
-                            <option value="TB">Trung bình</option>
+                            <option value="Trung bình">Trung bình</option>
                             <option value="Khó">Khó</option>
                         </select>
                     </div>
@@ -216,7 +213,7 @@
                                 <label class="form-label fw-semibold">Độ khó <span class="text-danger">*</span></label>
                                 <select class="form-select" id="questionDifficulty">
                                     <option value="Dễ">Dễ</option>
-                                    <option value="TB">Trung bình</option>
+                                    <option value="Trung bình">Trung bình</option>
                                     <option value="Khó">Khó</option>
                                 </select>
                             </div>
@@ -286,50 +283,30 @@
     </div>
 </div>
 
-<!-- Modal Import Excel -->
-<div class="modal fade" id="importExcelModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content rounded-4">
-            <div class="modal-header border-0 bg-success text-white">
-                <h5 class="modal-title"><i class="bi-file-excel-fill me-2"></i>Import câu hỏi từ Excel</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="bi-info-circle-fill me-2"></i>
-                    <strong>Hướng dẫn:</strong> File Excel cần có các cột: Nội dung, Môn học, Độ khó, Loại câu hỏi, Đáp án A, Đáp án B, Đáp án C, Đáp án D, Đáp án đúng, Điểm số
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Chọn file Excel</label>
-                    <input type="file" class="form-control" accept=".xlsx, .xls">
-                </div>
-                <div class="mb-3">
-                    <a href="#" class="text-primary">
-                        <i class="bi-download me-1"></i>Tải file mẫu Excel
-                    </a>
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-success" onclick="importExcel()">Import dữ liệu</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    // Dữ liệu mẫu
-    let questionsData = [
-        { id: 1, content: "HTML là viết tắt của từ gì?", subject: "Lập trình Web", chapter: "HTML/CSS", difficulty: "Dễ", type: "Trắc nghiệm", points: 1, optionA: "Hyper Text Markup Language", optionB: "Hyper Tool Markup Language", optionC: "Home Text Markup Language", optionD: "None", correctAnswer: "A" },
-        { id: 2, content: "CSS dùng để làm gì?", subject: "Lập trình Web", chapter: "HTML/CSS", difficulty: "Dễ", type: "Trắc nghiệm", points: 1, optionA: "Xử lý dữ liệu", optionB: "Trang trí giao diện", optionC: "Kết nối database", optionD: "Xử lý form", correctAnswer: "B" },
-        { id: 3, content: "Trong SQL, câu lệnh nào dùng để truy vấn dữ liệu?", subject: "Cơ sở dữ liệu", chapter: "SQL cơ bản", difficulty: "TB", type: "Trắc nghiệm", points: 1, optionA: "INSERT", optionB: "UPDATE", optionC: "SELECT", optionD: "DELETE", correctAnswer: "C" },
-        { id: 4, content: "JavaScript là ngôn ngữ lập trình gì?", subject: "Lập trình Web", chapter: "JavaScript", difficulty: "Dễ", type: "Trắc nghiệm", points: 1, optionA: "Backend", optionB: "Frontend", optionC: "Database", optionD: "Server", correctAnswer: "B" },
-        { id: 5, content: "Trình bày khái niệm về MVC trong ASP.NET Core?", subject: "Lập trình Web", chapter: "ASP.NET Core", difficulty: "Khó", type: "Tự luận", points: 2, optionA: "", optionB: "", optionC: "", optionD: "", correctAnswer: "" }
-    ];
-
-    let filteredQuestions = [...questionsData];
+    let questionsData = [];
+    let filteredQuestions = [];
     let currentPage = 1;
     let rowsPerPage = 5;
+    const safe = v => `${v ?? ''}`.replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+
+    async function loadQuestions() {
+        try {
+            const res = await fetch('/api/Api/questions');
+            if (!res.ok) throw new Error('Không tải được ngân hàng câu hỏi từ API');
+            questionsData = await res.json();
+            buildFilterOptions();
+            filterQuestions();
+        } catch (err) {
+            document.getElementById('questionTableBody').innerHTML = `<tr><td colspan="9" class="text-center text-danger py-4">${safe(err.message)}</td></tr>`;
+        }
+    }
+
+    function buildFilterOptions(){
+        const subjectSelect = document.getElementById('filterSubject');
+        const subjects = [...new Set(questionsData.map(q => q.subject).filter(Boolean))].sort();
+        subjectSelect.innerHTML = '<option value="all">Tất cả môn học</option>' + subjects.map(s => `<option value="${safe(s)}">${safe(s)}</option>`).join('');
+    }
 
     function filterQuestions() {
         const subject = document.getElementById('filterSubject').value;
@@ -344,13 +321,12 @@
             if (chapter !== 'all' && q.chapter !== chapter) match = false;
             if (difficulty !== 'all' && q.difficulty !== difficulty) match = false;
             if (type !== 'all' && q.type !== type) match = false;
-            if (search && !q.content.toLowerCase().includes(search)) match = false;
+            if (search && !(q.content || '').toLowerCase().includes(search)) match = false;
             return match;
         });
 
-        // Cập nhật thống kê
         const easy = filteredQuestions.filter(q => q.difficulty === 'Dễ').length;
-        const medium = filteredQuestions.filter(q => q.difficulty === 'TB').length;
+        const medium = filteredQuestions.filter(q => q.difficulty === 'Trung bình' || q.difficulty === 'TB').length;
         const hard = filteredQuestions.filter(q => q.difficulty === 'Khó').length;
 
         document.getElementById('totalCount').innerText = filteredQuestions.length;
@@ -358,7 +334,6 @@
         document.getElementById('mediumCount').innerText = medium;
         document.getElementById('hardCount').innerText = hard;
         document.getElementById('resultCount').innerHTML = `📊 Hiển thị ${filteredQuestions.length} của ${questionsData.length} câu hỏi`;
-
         currentPage = 1;
         renderTable();
     }
@@ -371,144 +346,89 @@
 
         if (pageData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">📭 Không tìm thấy câu hỏi nào!</td></tr>';
+            updatePagination();
             return;
         }
 
-        tbody.innerHTML = '';
-        pageData.forEach(q => {
-            const difficultyClass = q.difficulty === 'Dễ' ? 'bg-success' : (q.difficulty === 'TB' ? 'bg-warning' : 'bg-danger');
-            const row = `<tr>
-                <td><input type="checkbox" class="questionCheckbox" data-id="${q.id}"></td>
+        tbody.innerHTML = pageData.map(q => {
+            const diff = q.difficulty === 'TB' ? 'Trung bình' : q.difficulty;
+            const difficultyClass = diff === 'Dễ' ? 'bg-success' : (diff === 'Trung bình' ? 'bg-warning' : 'bg-danger');
+            return `<tr>
+                <td><input type="checkbox" class="questionCheckbox" data-id="${q.id}" onchange="updateSelectedCount()"></td>
                 <td>${q.id}</td>
-                <td>${q.content}</td>
-                <td>${q.subject}</td>
-                <td>${q.chapter || '-'}</td>
-                <td><span class="badge ${difficultyClass}">${q.difficulty}</span></td>
-                <td>${q.type}</td>
+                <td>${safe(q.content)}</td>
+                <td>${safe(q.subject)}</td>
+                <td>${safe(q.chapter || '-')}</td>
+                <td><span class="badge ${difficultyClass}">${safe(diff)}</span></td>
+                <td>${safe(q.type)}</td>
                 <td>${q.points}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editQuestion(${q.id})"><i class="bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(${q.id})"><i class="bi-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-danger me-1" onclick="deleteQuestion(${q.id})"><i class="bi-trash"></i></button>
                     <button class="btn btn-sm btn-outline-info" onclick="viewQuestion(${q.id})"><i class="bi-eye"></i></button>
                 </td>
             </tr>`;
-            tbody.innerHTML += row;
-        });
-
+        }).join('');
         updatePagination();
     }
 
     function updatePagination() {
-        const totalPages = Math.ceil(filteredQuestions.length / rowsPerPage);
+        const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / rowsPerPage));
         const pagination = document.getElementById('pagination');
-        if (totalPages <= 1) {
-            pagination.innerHTML = '<li class="page-item disabled"><a class="page-link" href="#">«</a></li><li class="page-item active"><a class="page-link" href="#">1</a></li><li class="page-item disabled"><a class="page-link" href="#">»</a></li>';
-            return;
-        }
-
-        let html = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="changePage(${currentPage - 1})">«</a></li>`;
-        for (let i = 1; i <= totalPages; i++) {
-            html += `<li class="page-item ${currentPage === i ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
-        }
-        html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="changePage(${currentPage + 1})">»</a></li>`;
+        let html = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="changePage(${currentPage - 1});return false;">«</a></li>`;
+        for (let i = 1; i <= totalPages; i++) html += `<li class="page-item ${currentPage === i ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i});return false;">${i}</a></li>`;
+        html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="changePage(${currentPage + 1});return false;">»</a></li>`;
         pagination.innerHTML = html;
     }
 
-    function changePage(page) {
-        currentPage = page;
-        renderTable();
+    function changePage(page) { const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / rowsPerPage)); currentPage = Math.min(Math.max(1, page), totalPages); renderTable(); }
+    function resetFilters() { ['filterSubject','filterChapter','filterDifficulty','filterType'].forEach(id => document.getElementById(id).value = 'all'); document.getElementById('searchKeyword').value = ''; filterQuestions(); }
+    function toggleSelectAll() { const all = document.getElementById('selectAll').checked; document.querySelectorAll('.questionCheckbox').forEach(cb => cb.checked = all); updateSelectedCount(); }
+    function updateSelectedCount() { const count = document.querySelectorAll('.questionCheckbox:checked').length; const el = document.getElementById('selectedCount'); if(el) el.innerHTML = `✅ Đã chọn ${count} câu hỏi`; }
+
+    async function bulkDelete() {
+        const ids = [...document.querySelectorAll('.questionCheckbox:checked')].map(cb => parseInt(cb.dataset.id));
+        if (!ids.length) return;
+        if (!confirm(`Bạn có chắc muốn xóa ${ids.length} câu hỏi đã chọn?`)) return;
+        for (const id of ids) await fetch(`/api/Api/question/${id}`, { method: 'DELETE' });
+        await loadQuestions(); updateSelectedCount();
     }
 
-    function resetFilters() {
-        document.getElementById('filterSubject').value = 'all';
-        document.getElementById('filterChapter').value = 'all';
-        document.getElementById('filterDifficulty').value = 'all';
-        document.getElementById('filterType').value = 'all';
-        document.getElementById('searchKeyword').value = '';
-        filterQuestions();
-    }
-
-    function toggleSelectAll() {
-        const all = document.getElementById('selectAll').checked;
-        document.querySelectorAll('.questionCheckbox').forEach(cb => cb.checked = all);
-        updateSelectedCount();
-    }
-
-    function updateSelectedCount() {
-        const count = document.querySelectorAll('.questionCheckbox:checked').length;
-        document.getElementById('selectedCount').innerHTML = `✅ Đã chọn ${count} câu hỏi`;
-    }
-
-    function bulkDelete() {
-        const checked = document.querySelectorAll('.questionCheckbox:checked');
-        if (checked.length === 0) return;
-        if (confirm(`Bạn có chắc muốn xóa ${checked.length} câu hỏi đã chọn?`)) {
-            checked.forEach(cb => {
-                const id = parseInt(cb.getAttribute('data-id'));
-                const index = questionsData.findIndex(q => q.id === id);
-                if (index !== -1) questionsData.splice(index, 1);
-            });
-            filterQuestions();
-            updateSelectedCount();
-        }
-    }
-
-    function submitAddQuestion() {
-        const content = document.getElementById('questionContent').value;
-        if (!content) {
-            alert('Vui lòng nhập nội dung câu hỏi!');
-            return;
-        }
-
-        const newId = questionsData.length + 1;
-        const newQuestion = {
-            id: newId,
-            content: content,
+    async function submitAddQuestion() {
+        const content = document.getElementById('questionContent').value.trim();
+        if (!content) { alert('Vui lòng nhập nội dung câu hỏi!'); return; }
+        const payload = {
+            content,
             subject: document.getElementById('questionSubject').value,
             chapter: document.getElementById('questionChapter').value,
-            difficulty: document.getElementById('questionDifficulty').value,
+            difficulty: document.getElementById('questionDifficulty').value === 'TB' ? 'Trung bình' : document.getElementById('questionDifficulty').value,
             type: document.getElementById('questionType').value,
-            points: parseInt(document.getElementById('questionPoints').value),
+            points: parseInt(document.getElementById('questionPoints').value || '1'),
             optionA: document.getElementById('optionA').value,
             optionB: document.getElementById('optionB').value,
             optionC: document.getElementById('optionC').value,
             optionD: document.getElementById('optionD').value,
             correctAnswer: document.getElementById('correctAnswer').value
         };
-
-        questionsData.push(newQuestion);
-        alert('Thêm câu hỏi thành công!');
-        $('#addQuestionModal').modal('hide');
-        document.getElementById('addQuestionForm').reset();
-        filterQuestions();
+        const res = await fetch('/api/Api/question', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        alert(data.message || (data.success ? 'Thêm câu hỏi thành công!' : 'Không thêm được câu hỏi'));
+        if(data.success){ $('#addQuestionModal').modal('hide'); document.getElementById('addQuestionForm').reset(); await loadQuestions(); }
     }
 
-    function editQuestion(id) {
-        alert('Chỉnh sửa câu hỏi ID: ' + id);
-    }
+    function editQuestion(id) { alert('Phần sửa nhanh sẽ được bổ sung sau. Hiện dữ liệu đã lấy thật từ database.'); }
 
-    function deleteQuestion(id) {
-        if (confirm('Bạn có chắc muốn xóa câu hỏi này?')) {
-            const index = questionsData.findIndex(q => q.id === id);
-            if (index !== -1) questionsData.splice(index, 1);
-            filterQuestions();
-        }
+    async function deleteQuestion(id) {
+        if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) return;
+        const res = await fetch(`/api/Api/question/${id}`, { method:'DELETE' });
+        const data = await res.json();
+        alert(data.message || (data.success ? 'Đã xóa câu hỏi' : 'Không xóa được câu hỏi'));
+        if(data.success) await loadQuestions();
     }
 
     function viewQuestion(id) {
         const q = questionsData.find(q => q.id === id);
-        if (q) {
-            alert(`Chi tiết câu hỏi:\n\nNội dung: ${q.content}\nMôn học: ${q.subject}\nĐộ khó: ${q.difficulty}\nĐiểm: ${q.points}`);
-        }
+        if (q) alert(`Chi tiết câu hỏi:\n\nNội dung: ${q.content}\nMôn học: ${q.subject}\nĐộ khó: ${q.difficulty}\nĐiểm: ${q.points}\nĐáp án đúng: ${q.correctAnswer || '-'}`);
     }
 
-    function importExcel() {
-        alert('Import dữ liệu thành công!');
-        $('#importExcelModal').modal('hide');
-    }
-
-    // Khởi tạo
-    document.addEventListener('DOMContentLoaded', function() {
-        filterQuestions();
-    });
+    document.addEventListener('DOMContentLoaded', loadQuestions);
 </script>

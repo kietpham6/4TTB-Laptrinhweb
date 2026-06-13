@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.IO;
@@ -87,14 +88,20 @@ namespace Thitructuyen.Controllers
                 user.AvatarUrl = avatarPath;
                 await _context.SaveChangesAsync();
 
-                // Cập nhật claim Avatar
-                var identity = User.Identity as ClaimsIdentity;
-                var avatarClaim = identity?.FindFirst("Avatar");
-                if (avatarClaim != null)
+                // Cấp lại cookie đăng nhập với claim Avatar mới (để hiển thị sau khi reload)
+                var claims = new List<Claim>
                 {
-                    identity?.RemoveClaim(avatarClaim);
-                }
-                identity?.AddClaim(new Claim("Avatar", avatarPath));
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("FullName", string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName),
+                    new Claim("Avatar", avatarPath),
+                    new Claim("UserId", user.Id.ToString()),
+                    new Claim("Email", user.Email ?? string.Empty)
+                };
+                var identity = new ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity));
 
                 return Json(new { success = true, message = "Cập nhật ảnh đại diện thành công!", avatarUrl = avatarPath });
             }

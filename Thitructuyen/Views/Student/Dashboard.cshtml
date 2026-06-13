@@ -1,0 +1,61 @@
+@{
+    ViewData["Title"] = "Dashboard học sinh";
+}
+<div class="pro-page-title">
+    <div>
+        <h2>🎓 Dashboard học sinh</h2>
+        <p>Theo dõi bài thi, điểm số, tiến độ và lịch sử học tập của riêng bạn.</p>
+    </div>
+    <a class="btn btn-primary" asp-controller="Exam" asp-action="Index"><i class="bi-pencil-square me-1"></i> Vào bài thi</a>
+</div>
+
+<div class="row g-4 mb-4" id="studentMetrics">
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-file-earmark-text"></i></div><div class="metric-value" data-k="availableExams">0</div><div class="metric-label">Bài thi đang mở</div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-clock-history"></i></div><div class="metric-value" data-k="totalAttempts">0</div><div class="metric-label">Lượt thi</div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-graph-up"></i></div><div class="metric-value" data-k="avgScore">0</div><div class="metric-label">Điểm trung bình</div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-icon"><i class="bi-trophy"></i></div><div class="metric-value" data-k="bestScore">0</div><div class="metric-label">Điểm cao nhất</div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="chart-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">📈 Biểu đồ điểm gần đây</h5>
+                <span class="badge bg-primary">Chart.js</span>
+            </div>
+            <canvas id="studentScoreChart" height="130"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="chart-card">
+            <h5 class="mb-3">📋 Kết quả mới nhất</h5>
+            <div class="table-responsive">
+                <table class="table table-hover table-pro align-middle">
+                    <thead><tr><th>Bài thi</th><th>Điểm</th><th>Chi tiết</th></tr></thead>
+                    <tbody id="latestResults"><tr><td colspan="3" class="text-center text-muted py-4">Đang tải...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let scoreChart;
+function loadStudentDashboard(){
+    fetch('/api/dashboard/student').then(r=>r.json()).then(data=>{
+        document.querySelectorAll('[data-k]').forEach(el=> el.textContent = data[el.dataset.k] ?? 0);
+        const labels = (data.chart || []).map(x=>x.label);
+        const scores = (data.chart || []).map(x=>x.score);
+        const ctx = document.getElementById('studentScoreChart');
+        if(scoreChart) scoreChart.destroy();
+        scoreChart = new Chart(ctx,{ type:'line', data:{ labels, datasets:[{ label:'Điểm', data:scores, tension:.35, fill:true }] }, options:{ responsive:true, scales:{ y:{ min:0, max:10 } } } });
+        const tbody = document.getElementById('latestResults');
+        if(!data.latest || data.latest.length===0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-muted py-4">Chưa có lịch sử thi</td></tr>'; return; }
+        tbody.innerHTML = data.latest.map(x=>`<tr><td><b>${x.exam}</b><br><small class="text-muted">${x.subject} • ${x.date}</small></td><td><span class="badge bg-primary">${x.score}</span></td><td><a class="btn btn-sm btn-outline-primary" href="/Student/ResultDetail?attemptId=${x.id}">Xem</a></td></tr>`).join('');
+    }).catch(()=> document.getElementById('latestResults').innerHTML='<tr><td colspan="3" class="text-danger text-center py-4">Không tải được dữ liệu</td></tr>');
+}
+loadStudentDashboard();
+</script>
+}

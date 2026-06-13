@@ -1,0 +1,60 @@
+@using System.Security.Claims
+@{
+    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Người dùng";
+    var avatar = User.FindFirst("Avatar")?.Value ?? "/images/main-logo.png";
+    var controller = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "").ToLower();
+    var action = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLower();
+    Func<string, string, string> active = (c, a) => controller == c.ToLower() && (string.IsNullOrEmpty(a) || action == a.ToLower()) ? "active" : "";
+}
+<aside class="app-sidebar">
+    <div class="sidebar-brand">
+        <img src="/images/main-logo.png" alt="Logo" />
+        <div>
+            <strong>Thi Trực Tuyến</strong>
+            <span>Hệ thống quản lý thi</span>
+        </div>
+    </div>
+    <div class="sidebar-user">
+        <img src="@avatar" onerror="this.src='/images/main-logo.png'" alt="Avatar" />
+        <div>
+            <strong>@fullName</strong>
+            <span>@(role == "Admin" ? "Quản trị viên" : role == "Teacher" ? "Giáo viên" : "Học sinh")</span>
+        </div>
+    </div>
+
+    @if (role == "Admin")
+    {
+        <div class="sidebar-title">Tổng quan</div>
+        <a class="sidebar-link @active("Admin", "Dashboard")" asp-controller="Admin" asp-action="Dashboard"><i class="bi-speedometer2"></i><span>Dashboard Admin</span></a>
+        <a class="sidebar-link @active("Admin", "Statistics")" asp-controller="Admin" asp-action="Statistics"><i class="bi-bar-chart-line"></i><span>Thống kê nâng cao</span></a>
+        <a class="sidebar-link @active("Admin", "Leaderboard")" asp-controller="Admin" asp-action="Leaderboard"><i class="bi-trophy"></i><span>Leaderboard</span></a>
+        <div class="sidebar-title">Quản trị</div>
+        <a class="sidebar-link @active("Admin", "Users")" asp-controller="Admin" asp-action="Users"><i class="bi-people"></i><span>Người dùng & phân quyền</span></a>
+        <a class="sidebar-link @active("Admin", "Subjects")" asp-controller="Admin" asp-action="Subjects"><i class="bi-journal-bookmark"></i><span>Môn học</span></a>
+        <a class="sidebar-link @active("Admin", "QuestionBank")" asp-controller="Admin" asp-action="QuestionBank"><i class="bi-question-circle"></i><span>Ngân hàng câu hỏi</span></a>
+        <a class="sidebar-link @active("Admin", "Exams")" asp-controller="Admin" asp-action="Exams"><i class="bi-file-earmark-text"></i><span>Kỳ thi</span></a>
+        <a class="sidebar-link @active("Admin", "ActivityLogs")" asp-controller="Admin" asp-action="ActivityLogs"><i class="bi-shield-check"></i><span>Audit Log</span></a>
+        <a class="sidebar-link @active("Admin", "Proctoring")" asp-controller="Admin" asp-action="Proctoring"><i class="bi-eye"></i><span>Giám sát Anti-cheat</span></a>
+        <a class="sidebar-link @active("Admin", "Settings")" asp-controller="Admin" asp-action="Settings"><i class="bi-gear"></i><span>Cấu hình</span></a>
+    }
+    else if (role == "Teacher")
+    {
+        <div class="sidebar-title">Giáo viên</div>
+        <a class="sidebar-link @active("Teacher", "Exams")" asp-controller="Teacher" asp-action="Exams"><i class="bi-file-earmark-text"></i><span>Quản lý đề thi</span></a>
+        <a class="sidebar-link @active("Teacher", "CreateExam")" asp-controller="Teacher" asp-action="CreateExam"><i class="bi-plus-circle"></i><span>Tạo đề thi</span></a>
+        <a class="sidebar-link @active("Teacher", "QuestionBank")" asp-controller="Teacher" asp-action="QuestionBank"><i class="bi-question-circle"></i><span>Ngân hàng câu hỏi</span></a>
+        <a class="sidebar-link @active("Teacher", "Grading")" asp-controller="Teacher" asp-action="Grading"><i class="bi-pencil-square"></i><span>Chấm bài tự luận</span></a>
+        <a class="sidebar-link @active("Teacher", "Statistics")" asp-controller="Teacher" asp-action="Statistics"><i class="bi-bar-chart-line"></i><span>Thống kê lớp</span></a>
+        <a class="sidebar-link @active("Teacher", "Proctoring")" asp-controller="Teacher" asp-action="Proctoring"><i class="bi-eye"></i><span>Giám sát Anti-cheat</span></a>
+    }
+    else if (role == "Student")
+    {
+        <div class="sidebar-title">Học sinh</div>
+        <a class="sidebar-link @active("Student", "Dashboard")" asp-controller="Student" asp-action="Dashboard"><i class="bi-speedometer2"></i><span>Dashboard của tôi</span></a>
+        <a class="sidebar-link @active("Exam", "Index")" asp-controller="Exam" asp-action="Index"><i class="bi-pencil-square"></i><span>Bài thi của tôi</span></a>
+        <a class="sidebar-link @active("Student", "History")" asp-controller="Student" asp-action="History"><i class="bi-clock-history"></i><span>Lịch sử thi</span></a>
+        <a class="sidebar-link @active("Student", "Ranking")" asp-controller="Student" asp-action="Ranking"><i class="bi-trophy"></i><span>Xếp hạng</span></a>
+        <a class="sidebar-link @active("Student", "Statistics")" asp-controller="Student" asp-action="Statistics"><i class="bi-graph-up"></i><span>Thống kê cá nhân</span></a>
+    }
+</aside>

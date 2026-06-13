@@ -1,7 +1,10 @@
 ﻿@{
     ViewData["Title"] = "Hồ sơ cá nhân";
     var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name;
-    var avatar = User.FindFirst("Avatar")?.Value ?? "/Temp/images/avatar/default-avatar.png";
+    var rawAvatar = User.FindFirst("Avatar")?.Value;
+    var avatar = string.IsNullOrEmpty(rawAvatar)
+        ? "https://ui-avatars.com/api/?background=4f83d1&color=fff&size=150&rounded=true&name=" + Uri.EscapeDataString(fullName ?? "User")
+        : rawAvatar;
     var role = User.FindFirst(ClaimTypes.Role)?.Value;
 }
 
@@ -13,7 +16,7 @@
                     <div class="card-body text-center p-4">
                         <!-- Avatar với nút đổi -->
                         <div class="position-relative d-inline-block">
-                            <img id="avatarPreview" src="@avatar" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #667eea;">
+                            <img id="avatarPreview" src="@avatar" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #4f83d1;" onerror="this.src='https://ui-avatars.com/api/?background=4f83d1&color=fff&size=150&rounded=true&name=User'">
                             <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 35px; height: 35px;" onclick="document.getElementById('avatarInput').click();">
                                 <i class="bi-camera-fill"></i>
                             </button>
@@ -138,10 +141,24 @@
 
     function saveAvatar() {
         var fileInput = document.getElementById('avatarInput');
-        if (fileInput.files.length > 0) {
-            alert('Đã cập nhật ảnh đại diện thành công!');
-        } else {
+        if (fileInput.files.length === 0) {
             alert('Vui lòng chọn ảnh trước!');
+            return;
         }
+        var formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        fetch('/Avatar/Upload', { method: 'POST', body: formData })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    document.getElementById('avatarPreview').src = data.avatarUrl + '?t=' + Date.now();
+                    alert(data.message || 'Cập nhật ảnh đại diện thành công!');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Tải ảnh thất bại!');
+                }
+            })
+            .catch(function (err) { alert('Lỗi khi tải ảnh: ' + err); });
     }
 </script>

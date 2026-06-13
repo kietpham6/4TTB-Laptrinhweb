@@ -1,356 +1,223 @@
-﻿@{
-    ViewData["Title"] = "Chấm bài thi";
+@{
+    ViewData["Title"] = "Chấm bài tự luận";
 }
 
-<section class="services-section section-padding">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2>✏️ Chấm bài thi</h2>
-                <p class="text-muted">Chấm điểm các bài thi tự luận và nhận xét</p>
-            </div>
-        </div>
-
-        <!-- Bộ lọc tìm bài cần chấm - ĐÃ SỬA LỖI -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <select class="form-select" id="filterExam" onchange="filterSubmissions()">
-                            <option value="all">Tất cả đề thi</option>
-                            <option value="1">Kiểm tra giữa kỳ - Lập trình Web</option>
-                            <option value="2">Ôn tập cuối kỳ - Cơ sở dữ liệu</option>
-                            <option value="3">Đánh giá năng lực - Tiếng Anh</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterStatus" onchange="filterSubmissions()">
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="pending">Chờ chấm</option>
-                            <option value="graded">Đã chấm</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchStudent" placeholder="Tìm theo tên học viên" onkeyup="filterSubmissions()">
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-                            <i class="bi-arrow-repeat me-1"></i>Reset
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Danh sách bài cần chấm -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 px-4">
-                <h5 class="mb-0">📋 Danh sách bài thi cần chấm</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="submissionsTable">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">STT</th>
-                                <th>Học viên</th>
-                                <th>Bài thi</th>
-                                <th>Ngày nộp</th>
-                                <th>Điểm tự luận</th>
-                                <th>Trạng thái</th>
-                                <th class="text-center pe-4">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="submissionsTableBody">
-                            <tr>
-                                <td class="ps-4">1</td>
-                                <td>Nguyễn Văn A</td>
-                                <td data-exam="1">Kiểm tra giữa kỳ</td>
-                                <td>15/03/2026 10:30</td>
-                                <td><span class="badge bg-warning" data-score="pending">Chưa chấm</span></td>
-                                <td><span class="badge bg-secondary" data-status="pending">Đã nộp</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#gradeModal" onclick="openGradeModal(1, 'Nguyễn Văn A')">
-                                        <i class="bi-pencil-square me-1"></i>Chấm bài
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">2</td>
-                                <td>Trần Thị B</td>
-                                <td data-exam="2">Ôn tập cuối kỳ</td>
-                                <td>20/03/2026 15:45</td>
-                                <td><span class="badge bg-warning" data-score="pending">Chưa chấm</span></td>
-                                <td><span class="badge bg-secondary" data-status="pending">Đã nộp</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#gradeModal" onclick="openGradeModal(2, 'Trần Thị B')">
-                                        <i class="bi-pencil-square me-1"></i>Chấm bài
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">3</td>
-                                <td>Lê Văn C</td>
-                                <td data-exam="1">Kiểm tra giữa kỳ</td>
-                                <td>16/03/2026 09:20</td>
-                                <td><span class="badge bg-success" data-score="7.5">7.5</span></td>
-                                <td><span class="badge bg-success" data-status="graded">Đã chấm</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewModal" onclick="openViewModal(3, 'Lê Văn C')">
-                                        <i class="bi-eye me-1"></i>Xem
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">4</td>
-                                <td>Phạm Thị D</td>
-                                <td data-exam="2">Ôn tập cuối kỳ</td>
-                                <td>21/03/2026 14:00</td>
-                                <td><span class="badge bg-warning" data-score="pending">Chưa chấm</span></td>
-                                <td><span class="badge bg-secondary" data-status="pending">Đã nộp</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#gradeModal" onclick="openGradeModal(4, 'Phạm Thị D')">
-                                        <i class="bi-pencil-square me-1"></i>Chấm bài
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="ps-4">5</td>
-                                <td>Hoàng Văn E</td>
-                                <td data-exam="3">Đánh giá năng lực</td>
-                                <td>22/03/2026 11:15</td>
-                                <td><span class="badge bg-warning" data-score="pending">Chưa chấm</span></td>
-                                <td><span class="badge bg-secondary" data-status="pending">Đã nộp</span></td>
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#gradeModal" onclick="openGradeModal(5, 'Hoàng Văn E')">
-                                        <i class="bi-pencil-square me-1"></i>Chấm bài
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card-footer bg-white border-0 pt-3 pb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted" id="resultCount">📊 Hiển thị 5 của 5 bài thi</span>
-                </div>
-            </div>
-        </div>
+<div class="pro-page-title">
+    <div>
+        <h2>✏️ Chấm bài tự luận</h2>
+        <p>Danh sách bài làm lấy trực tiếp từ database. Giáo viên chấm câu tự luận và hệ thống tự cập nhật tổng điểm.</p>
     </div>
-</section>
+</div>
 
-<!-- Modal Chấm bài -->
-<div class="modal fade" id="gradeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg" style="margin-top:120px;">
-        <div class="modal-content rounded-4">
-            <div class="modal-header border-0 bg-primary text-white">
-                <h5 class="modal-title"><i class="bi-pencil-square me-2"></i>Chấm bài thi</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="fw-bold">Học viên:</label>
-                    <span id="studentName" class="ms-2"></span>
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold">Câu hỏi tự luận 1:</label>
-                    <p class="border rounded-3 p-3 bg-light mt-2">Trình bày khái niệm về MVC trong ASP.NET Core?</p>
-                    <textarea class="form-control mb-2" id="answer1" rows="3" placeholder="Câu trả lời của học viên..." readonly></textarea>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <input type="number" class="form-control" id="score1" placeholder="Điểm (0-10)" min="0" max="10" oninput="calculateTotal()">
-                        </div>
-                        <div class="col-md-4">
-                            <span class="form-text text-muted">/10 điểm</span>
-                        </div>
-                    </div>
-                    <textarea class="form-control mt-2" id="comment1" rows="2" placeholder="Nhận xét..."></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold">Câu hỏi tự luận 2:</label>
-                    <p class="border rounded-3 p-3 bg-light mt-2">Giải thích cách hoạt động của Entity Framework?</p>
-                    <textarea class="form-control mb-2" id="answer2" rows="3" placeholder="Câu trả lời của học viên..." readonly></textarea>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <input type="number" class="form-control" id="score2" placeholder="Điểm (0-10)" min="0" max="10" oninput="calculateTotal()">
-                        </div>
-                        <div class="col-md-4">
-                            <span class="form-text text-muted">/10 điểm</span>
-                        </div>
-                    </div>
-                    <textarea class="form-control mt-2" id="comment2" rows="2" placeholder="Nhận xét..."></textarea>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="fw-bold">Điểm trắc nghiệm:</label>
-                        <input type="text" class="form-control" id="multipleChoiceScore" value="8.5" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="fw-bold">Tổng điểm:</label>
-                        <input type="text" class="form-control" id="totalScore" value="0" readonly>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="submitGrade()">Lưu điểm</button>
-            </div>
+<div class="chart-card mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+            <label class="form-label">Kỳ thi</label>
+            <select class="form-select" id="filterExam">
+                <option value="all">Tất cả kỳ thi</option>
+            </select>
+        </div>
+        <div class="col-lg-3">
+            <label class="form-label">Trạng thái</label>
+            <select class="form-select" id="filterStatus">
+                <option value="all">Tất cả</option>
+                <option value="pending">Chờ chấm</option>
+                <option value="graded">Đã chấm</option>
+            </select>
+        </div>
+        <div class="col-lg-3">
+            <label class="form-label">Tìm học viên</label>
+            <input type="text" class="form-control" id="searchStudent" placeholder="Nhập tên học viên...">
+        </div>
+        <div class="col-lg-2 d-grid">
+            <button class="btn btn-outline-secondary" onclick="resetFilters()"><i class="bi-arrow-repeat me-1"></i>Reset</button>
         </div>
     </div>
 </div>
 
-<!-- Modal Xem chi tiết -->
-<div class="modal fade" id="viewModal" tabindex="-1">
-    <div class="modal-dialog modal-lg" style="margin-top:120px;">
+<div class="row g-4 mb-4">
+    <div class="col-md-4"><div class="metric-card"><div class="metric-icon"><i class="bi-inbox"></i></div><div class="metric-value" id="totalSubmissions">0</div><div class="metric-label">Tổng bài đã nộp</div></div></div>
+    <div class="col-md-4"><div class="metric-card"><div class="metric-icon"><i class="bi-hourglass-split"></i></div><div class="metric-value" id="pendingSubmissions">0</div><div class="metric-label">Chờ chấm</div></div></div>
+    <div class="col-md-4"><div class="metric-card"><div class="metric-icon"><i class="bi-check-circle"></i></div><div class="metric-value" id="gradedSubmissions">0</div><div class="metric-label">Đã chấm</div></div></div>
+</div>
+
+<div class="chart-card">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="mb-0">📋 Danh sách bài làm</h5>
+        <span class="badge bg-primary">Dữ liệu thật</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Học viên</th>
+                    <th>Kỳ thi</th>
+                    <th>Môn học</th>
+                    <th>Ngày nộp</th>
+                    <th>Điểm</th>
+                    <th>Tự luận</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="submissionsTableBody">
+                <tr><td colspan="9" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pt-3 text-muted" id="resultCount">📊 Hiển thị 0 bài làm</div>
+</div>
+
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" style="margin-top:90px;">
         <div class="modal-content rounded-4">
-            <div class="modal-header border-0 bg-info text-white">
-                <h5 class="modal-title"><i class="bi-eye me-2"></i>Chi tiết bài làm</h5>
+            <div class="modal-header border-0 bg-primary text-white">
+                <h5 class="modal-title"><i class="bi-pencil-square me-2"></i><span id="modalTitle">Chi tiết bài làm</span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="fw-bold">Học viên:</label>
-                    <span id="viewStudentName" class="ms-2"></span>
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold">Câu hỏi tự luận 1:</label>
-                    <p class="border rounded-3 p-3 bg-light mt-2">Trình bày khái niệm về MVC trong ASP.NET Core?</p>
-                    <textarea class="form-control mb-2" rows="3" readonly>Đây là câu trả lời mẫu của học viên...</textarea>
-                    <div class="alert alert-success mt-2">
-                        <strong>Điểm: 8.5/10</strong><br>
-                        <strong>Nhận xét:</strong> Bài làm tốt, trình bày rõ ràng.
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold">Câu hỏi tự luận 2:</label>
-                    <p class="border rounded-3 p-3 bg-light mt-2">Giải thích cách hoạt động của Entity Framework?</p>
-                    <textarea class="form-control mb-2" rows="3" readonly>Đây là câu trả lời mẫu của học viên...</textarea>
-                    <div class="alert alert-success mt-2">
-                        <strong>Điểm: 7.5/10</strong><br>
-                        <strong>Nhận xét:</strong> Cần bổ sung thêm ví dụ.
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Điểm trắc nghiệm:</strong> 8.5
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Tổng điểm:</strong> 8.5
-                    </div>
-                </div>
+                <div id="attemptSummary" class="alert alert-info mb-4">Đang tải...</div>
+                <div id="answersContainer" class="vstack gap-3"></div>
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="saveAllEssayScores()"><i class="bi-save me-1"></i>Lưu điểm tự luận</button>
             </div>
         </div>
     </div>
 </div>
 
+@section Scripts {
 <script>
-    // Dữ liệu bài thi mẫu
-    let submissionsData = [
-        { id: 1, student: "Nguyễn Văn A", examId: "1", examName: "Kiểm tra giữa kỳ", date: "15/03/2026 10:30", score: "pending", status: "pending" },
-        { id: 2, student: "Trần Thị B", examId: "2", examName: "Ôn tập cuối kỳ", date: "20/03/2026 15:45", score: "pending", status: "pending" },
-        { id: 3, student: "Lê Văn C", examId: "1", examName: "Kiểm tra giữa kỳ", date: "16/03/2026 09:20", score: "7.5", status: "graded" },
-        { id: 4, student: "Phạm Thị D", examId: "2", examName: "Ôn tập cuối kỳ", date: "21/03/2026 14:00", score: "pending", status: "pending" },
-        { id: 5, student: "Hoàng Văn E", examId: "3", examName: "Đánh giá năng lực", date: "22/03/2026 11:15", score: "pending", status: "pending" }
-    ];
+let submissionsData = [];
+let currentAttemptId = null;
+const safe = v => `${v ?? ''}`.replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
 
-    function filterSubmissions() {
-        var examFilter = document.getElementById('filterExam').value;
-        var statusFilter = document.getElementById('filterStatus').value;
-        var searchText = document.getElementById('searchStudent').value.toLowerCase();
+async function loadExams(){
+    try{
+        const res = await fetch('/api/Api/exams');
+        const exams = await res.json();
+        const select = document.getElementById('filterExam');
+        select.innerHTML = '<option value="all">Tất cả kỳ thi</option>' + (exams || []).map(e => `<option value="${e.id}">${safe(e.title || e.name)}</option>`).join('');
+    }catch{ }
+}
 
-        var tbody = document.getElementById('submissionsTableBody');
-        var rows = tbody.getElementsByTagName('tr');
-        var visibleCount = 0;
-
-        for(var i = 0; i < rows.length; i++) {
-            var row = rows[i];
-            var examName = row.cells[2].innerText;
-            var examId = row.cells[2].getAttribute('data-exam');
-            var statusBadge = row.cells[5].querySelector('.badge');
-            var status = statusBadge ? statusBadge.getAttribute('data-status') : 'pending';
-            var studentName = row.cells[1].innerText;
-
-            var matchExam = (examFilter === 'all' || examId === examFilter);
-            var matchStatus = (statusFilter === 'all' || status === statusFilter);
-            var matchSearch = (searchText === '' || studentName.toLowerCase().includes(searchText));
-
-            if(matchExam && matchStatus && matchSearch) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        }
-
-        document.getElementById('resultCount').innerHTML = '📊 Hiển thị ' + visibleCount + ' của ' + submissionsData.length + ' bài thi';
+async function loadSubmissions(){
+    const exam = document.getElementById('filterExam').value;
+    const status = document.getElementById('filterStatus').value;
+    const search = document.getElementById('searchStudent').value || '';
+    const params = new URLSearchParams();
+    if(exam !== 'all') params.set('examId', exam);
+    if(status !== 'all') params.set('status', status);
+    if(search.trim()) params.set('search', search.trim());
+    try{
+        const res = await fetch('/Teacher/SubmissionsForGrading?' + params.toString());
+        if(!res.ok) throw new Error('Không tải được danh sách bài làm');
+        submissionsData = await res.json();
+        renderSubmissions(submissionsData);
+    }catch(err){
+        document.getElementById('submissionsTableBody').innerHTML = `<tr><td colspan="9" class="text-center text-danger py-4">${safe(err.message)}</td></tr>`;
     }
+}
 
-    function resetFilters() {
-        document.getElementById('filterExam').value = 'all';
-        document.getElementById('filterStatus').value = 'all';
-        document.getElementById('searchStudent').value = '';
-        filterSubmissions();
+function renderSubmissions(data){
+    totalSubmissions.textContent = data.length;
+    pendingSubmissions.textContent = data.filter(x => x.status === 'pending').length;
+    gradedSubmissions.textContent = data.filter(x => x.status === 'graded').length;
+    resultCount.textContent = `📊 Hiển thị ${data.length} bài làm`;
+    const body = document.getElementById('submissionsTableBody');
+    if(!data.length){
+        body.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">Chưa có bài làm phù hợp</td></tr>';
+        return;
     }
+    body.innerHTML = data.map(x => `
+        <tr>
+            <td>${x.attemptId}</td>
+            <td><b>${safe(x.student)}</b></td>
+            <td>${safe(x.examName)}</td>
+            <td>${safe(x.subject)}</td>
+            <td>${safe(x.date)}</td>
+            <td>${x.score === 'pending' ? '<span class="badge bg-warning text-dark">Chờ chấm</span>' : `<span class="badge bg-success">${safe(x.score)}/10</span>`}</td>
+            <td>${x.essayGraded}/${x.essayTotal}</td>
+            <td><span class="badge ${x.status === 'graded' ? 'bg-success' : 'bg-warning text-dark'}">${safe(x.statusText)}</span></td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="openDetail(${x.attemptId})"><i class="bi-eye me-1"></i>Xem/chấm</button></td>
+        </tr>`).join('');
+}
 
-    function searchSubmissions() {
-        filterSubmissions();
+async function openDetail(attemptId){
+    currentAttemptId = attemptId;
+    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+    document.getElementById('attemptSummary').innerHTML = 'Đang tải...';
+    document.getElementById('answersContainer').innerHTML = '';
+    modal.show();
+    try{
+        const res = await fetch('/Teacher/AttemptDetail?attemptId=' + attemptId);
+        const data = await res.json();
+        if(!data.success) throw new Error(data.message || 'Không tải được chi tiết');
+        const a = data.attempt;
+        modalTitle.textContent = `Bài làm #${a.id} - ${a.student}`;
+        attemptSummary.innerHTML = `<b>Học viên:</b> ${safe(a.student)} &nbsp; | &nbsp; <b>Kỳ thi:</b> ${safe(a.exam)} &nbsp; | &nbsp; <b>Môn:</b> ${safe(a.subject)}<br><b>Ngày nộp:</b> ${safe(a.submitTime)} &nbsp; | &nbsp; <b>Điểm hiện tại:</b> ${safe(a.score)}/10 &nbsp; | &nbsp; <b>Vi phạm:</b> ${a.violations}`;
+        renderAnswers(data.answers || []);
+    }catch(err){
+        attemptSummary.innerHTML = `<span class="text-danger">${safe(err.message)}</span>`;
     }
+}
 
-    var currentStudentId = null;
+function optionText(ans){ return ans ? safe(ans) : '<span class="text-muted">Không trả lời</span>'; }
+function renderAnswers(answers){
+    const wrap = document.getElementById('answersContainer');
+    if(!answers.length){ wrap.innerHTML = '<div class="text-muted">Không có câu trả lời.</div>'; return; }
+    wrap.innerHTML = answers.map((x, i) => {
+        const isEssay = (x.type || '').toLowerCase().includes('tự luận');
+        return `<div class="border rounded-4 p-3 bg-white" data-answer-id="${x.answerId}" data-is-essay="${isEssay}">
+            <div class="d-flex justify-content-between gap-2 flex-wrap mb-2">
+                <h6 class="mb-0">Câu ${i + 1}: ${safe(x.question)}</h6>
+                <span class="badge ${isEssay ? 'bg-warning text-dark' : (x.isCorrect ? 'bg-success' : 'bg-danger')}">${safe(x.type || 'Câu hỏi')}</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div><b>Câu trả lời:</b> ${optionText(x.selectedAnswer)}</div>
+                    ${!isEssay ? `<div class="mt-2"><b>Đáp án đúng:</b> ${safe(x.correctAnswer)}</div>` : ''}
+                    ${x.optionA || x.optionB || x.optionC || x.optionD ? `<div class="small text-muted mt-2">A. ${safe(x.optionA)} &nbsp; B. ${safe(x.optionB)} &nbsp; C. ${safe(x.optionC)} &nbsp; D. ${safe(x.optionD)}</div>` : ''}
+                </div>
+                <div class="col-md-4">
+                    ${isEssay ? `<label class="form-label">Điểm / ${x.maxPoints}</label><input type="number" class="form-control essay-score" min="0" max="${x.maxPoints}" step="0.25" value="${x.essayScore ?? ''}"><label class="form-label mt-2">Nhận xét</label><textarea class="form-control essay-comment" rows="2">${safe(x.teacherComment)}</textarea>` : `<span class="badge ${x.isCorrect ? 'bg-success' : 'bg-danger'}">${x.isCorrect ? 'Đúng' : 'Sai'}</span>`}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
 
-    function openGradeModal(id, name) {
-        currentStudentId = id;
-        document.getElementById('studentName').innerText = name;
-        document.getElementById('score1').value = '';
-        document.getElementById('score2').value = '';
-        document.getElementById('comment1').value = '';
-        document.getElementById('comment2').value = '';
-        calculateTotal();
+async function saveAllEssayScores(){
+    const blocks = [...document.querySelectorAll('#answersContainer [data-is-essay="true"]')];
+    if(!blocks.length){ alert('Bài này không có câu tự luận để chấm.'); return; }
+    for(const block of blocks){
+        const answerId = block.getAttribute('data-answer-id');
+        const score = block.querySelector('.essay-score').value;
+        const comment = block.querySelector('.essay-comment').value || '';
+        if(score === ''){ alert('Vui lòng nhập điểm cho tất cả câu tự luận.'); return; }
+        const form = new URLSearchParams();
+        form.set('answerId', answerId);
+        form.set('score', score);
+        form.set('comment', comment);
+        const res = await fetch('/Teacher/GradeEssay', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: form.toString() });
+        const data = await res.json();
+        if(!data.success){ alert(data.message || 'Lưu điểm thất bại'); return; }
     }
+    alert('Đã lưu điểm tự luận và cập nhật tổng điểm.');
+    await loadSubmissions();
+    if(currentAttemptId) openDetail(currentAttemptId);
+}
 
-    function calculateTotal() {
-        var score1 = parseFloat(document.getElementById('score1').value) || 0;
-        var score2 = parseFloat(document.getElementById('score2').value) || 0;
-        var mcScore = parseFloat(document.getElementById('multipleChoiceScore').value) || 0;
-        var total = score1 + score2 + mcScore;
-        document.getElementById('totalScore').value = total.toFixed(1);
-    }
+function resetFilters(){
+    filterExam.value = 'all'; filterStatus.value = 'all'; searchStudent.value = '';
+    loadSubmissions();
+}
 
-    function submitGrade() {
-        var totalScore = document.getElementById('totalScore').value;
-        if(confirm('Lưu điểm ' + totalScore + ' cho học viên này?')) {
-            // Cập nhật lại bảng
-            var tbody = document.getElementById('submissionsTableBody');
-            var rows = tbody.getElementsByTagName('tr');
-            for(var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                if(row.cells[0].innerText == currentStudentId) {
-                    var scoreCell = row.cells[4];
-                    var statusCell = row.cells[5];
-                    scoreCell.innerHTML = '<span class="badge bg-success" data-score="' + totalScore + '">' + totalScore + '</span>';
-                    statusCell.innerHTML = '<span class="badge bg-success" data-status="graded">Đã chấm</span>';
-                    break;
-                }
-            }
-            alert('Đã lưu điểm thành công!');
-            $('#gradeModal').modal('hide');
-            filterSubmissions();
-        }
-    }
-
-    function openViewModal(id, name) {
-        document.getElementById('viewStudentName').innerText = name;
-        $('#viewModal').modal('show');
-    }
-
-    // Khởi tạo
-    document.addEventListener('DOMContentLoaded', function() {
-        filterSubmissions();
-    });
+filterExam.addEventListener('change', loadSubmissions);
+filterStatus.addEventListener('change', loadSubmissions);
+searchStudent.addEventListener('input', () => { clearTimeout(window.__gradingTimer); window.__gradingTimer = setTimeout(loadSubmissions, 350); });
+loadExams().then(loadSubmissions);
 </script>
+}
